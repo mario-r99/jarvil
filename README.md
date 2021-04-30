@@ -2,7 +2,7 @@
 
 ### Introduction
 
-Smart Office is a project of the "Smart Cities & IoT" course at the University of Stuttgart. It's main goal is to simplify and automate various tasks in a modern office to make daily work easier for employees.
+J.A.R.V.I.L. is a project of the "Smart Cities & IoT" course at the University of Stuttgart. It's main goal is to simplify and automate various tasks in a modern office to make daily work easier for employees.
 
 ### Full Documentation
 
