@@ -1,11 +1,12 @@
-version: "3"
+version: "3.9"
 services:
- mqtt:
-      image: toke/mosquitto
-      network_mode: bridge
-      container_name: mqtt
-      expose:
-        - 1883
-      ports:
-        - 1883:1883
-      restart: unless-stopped
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/code
+    environment:
+      FLASK_ENV: development
+  redis:
+    image: "redis:alpine"
