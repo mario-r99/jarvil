@@ -1,12 +1,12 @@
 version: "3.9"
 services:
-  web:
-    build: .
-    ports:
-      - "5000:5000"
+  mqtt-broker:
+    image: eclipse-mosquitto
+    restart: always
     volumes:
-      - .:/code
-    environment:
-      FLASK_ENV: development
-  redis:
-    image: "redis:alpine"
+      - ./mqtt-broker/config:/mosquitto/config
+      - ./mqtt-broker/data:/mosquitto/data
+      - ./mqtt-broker/log:/mosquitto/log
+    ports:
+      - 1883:1883
+      - 9001:9001
