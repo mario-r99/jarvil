@@ -4,9 +4,7 @@ services:
     image: eclipse-mosquitto
     restart: always
     volumes:
-      - ./mqtt-broker/config:/mosquitto/config
-      - ./mqtt-broker/data:/mosquitto/data
-      - ./mqtt-broker/log:/mosquitto/log
+      - ./mqtt-broker:/mosquitto
     ports:
       - 1883:1883
       - 9001:9001
