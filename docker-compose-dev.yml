@@ -7,8 +7,12 @@ services:
       - 9001:9001
     volumes:
       - ./mqtt-broker:/mosquitto
-  mqtt-client:
-    build: ./mqtt-client
+  time-slot-booking:
+    build: ./time-slot-booking
+    ports:
+      - "5000:5000"
     volumes:
-      - ./mqtt-client:/client
+      - ./time-slot-booking:/app
+    environment:
+      FLASK_ENV: development
 
