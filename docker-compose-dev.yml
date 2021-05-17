@@ -2,9 +2,12 @@ version: "2.1"
 services:
   mqtt-broker:
     build: ./mqtt-broker
-    restart: always
     ports:
       - 1883:1883
       - 9001:9001
+    volumes:
+      - ./mqtt-broker:/mosquitto
   mqtt-client:
     build: ./mqtt-client
+    volumes:
+      - ./mqtt-client:/client
