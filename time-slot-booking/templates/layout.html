@@ -7,6 +7,7 @@
 
     <title>Time Slot Booking - J.A.R.V.I.L.</title>
 
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.6.21/dist/css/uikit.min.css" />
     <link rel="stylesheet" href="../static/grid-addon.css" />
 </head>
@@ -19,7 +20,7 @@
 				<nav class="uk-navbar" id="navbar" data-uk-navbar>
 					<div class="uk-navbar-left">
 						<a class="uk-navbar-item uk-logo" href="#">
-                            <img width="150" src="../static/logo-cropped.png" alt="Logo" />
+                            <img width="150" src="{{url_for('static', filename='logo-cropped.png')}}" alt="Logo" />
                         </a>
 					</div>
 					<div class="uk-navbar-right">
