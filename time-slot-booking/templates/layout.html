@@ -19,7 +19,7 @@
 			<div class="uk-container uk-container-expand uk-light">
 				<nav class="uk-navbar" id="navbar" data-uk-navbar>
 					<div class="uk-navbar-left">
-						<a class="uk-navbar-item uk-logo" href="#">
+						<a class="uk-navbar-item uk-logo" href="{{url_for('home')}}">
                             <img width="150" src="{{url_for('static', filename='logo-cropped.png')}}" alt="Logo" />
                         </a>
 					</div>
@@ -36,6 +36,18 @@
 		</header>
 		<!--/HEADER-->
 		
+		<!--SUBMISSION POPUP-->
+		{% with messages = get_flashed_messages(with_categories=true) %}
+			{% if messages %}
+				{% for category, message in messages %}
+				<div class="uk-alert-{{ category }}" uk-alert>
+					<a class="uk-alert-close" uk-close></a>
+					<p>{{ message }}</p>
+				</div>
+				{% endfor %}
+			{% endif %}
+		{% endwith %}
+		<!--/SUBMISSION POPUP-->
 		
 		<!--CONTENT-->
 		{% block content %}{% endblock %}

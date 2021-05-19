@@ -19,7 +19,8 @@
     <div class="uk-container">
         <h3 class="uk-text-bold">Booking System</h3>
         <div class="uk-overflow-auto">
-            <form>
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
                 <table class="uk-table uk-table-middle uk-table-divider uk-table-large uk-table-justify" data-uk-scrollspy="cls:uk-animation-fade;">
                     <thead>
                         <tr>
@@ -79,16 +80,49 @@
                 </table>
                 <div class="uk-grid-small uk-margin-medium-top" uk-grid>
                     <div class="uk-width-1-2@s">
-                        <input class="uk-input" type="text" placeholder="First Name">
+                        {{ form.firstname.label(class="uk-form-label")}}
+
+                        {% if form.firstname.errors %}
+                            {{ form.firstname(class="uk-input uk-form-danger") }}
+                            <div class="uk-text-small uk-text-light uk-text-danger">
+                                {% for error in form.firstname.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.firstname(class="uk-input") }}
+                        {% endif %}
                     </div>
                     <div class="uk-width-1-2@s">
-                        <input class="uk-input" type="text" placeholder="Last Name">
+                        {{ form.lastname.label(class="uk-form-label")}}
+
+                        {% if form.lastname.errors %}
+                            {{ form.lastname(class="uk-input uk-form-danger") }}
+                            <div class="uk-text-small uk-text-light uk-text-danger">
+                                {% for error in form.lastname.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.lastname(class="uk-input") }}
+                        {% endif %}
                     </div>
                     <div class="uk-width-1-1">
-                        <input class="uk-input" type="text" placeholder="E-mail">
+                        {{ form.email.label(class="uk-form-label")}}
+
+                        {% if form.email.errors %}
+                            {{ form.email(class="uk-input uk-form-danger") }}
+                            <div class="uk-text-small uk-text-light uk-text-danger">
+                                {% for error in form.email.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.email(class="uk-input") }}
+                        {% endif %}
                     </div>
                     <div class="uk-width-1-1">
-                        <button class="uk-button uk-button-primary uk-align-right">Submit Reservation</button>
+                        {{ form.submit(class="uk-button uk-button-primary uk-align-right") }}
                     </div>
                 </div>
             </form>
