@@ -7,3 +7,9 @@ services:
       - 9001:9001
     volumes:
       - ./mqtt-broker:/mosquitto
+  brightness-service:
+    build: ./brightness-service
+    volumes:
+      - ./brightness-service:/app
+    devices:
+      - /dev/ttyACM0
