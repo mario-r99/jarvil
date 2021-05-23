@@ -15,4 +15,6 @@ services:
       - ./time-slot-booking:/app
     environment:
       FLASK_ENV: development
+  redis:
+    image: redis:alpine
 

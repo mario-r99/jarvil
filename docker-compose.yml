@@ -10,3 +10,5 @@ services:
     build: ./time-slot-booking
     ports:
       - "5000:5000"
+  redis:
+    image: redis:alpine
