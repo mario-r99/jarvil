@@ -6,6 +6,9 @@ import json
 import time
 import sys
 
+# Initialize room
+slot_amount = 10
+
 # Initialize flask server
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8fd4b5b09d72052a2ef9e200dc3a990e'
@@ -30,27 +33,42 @@ def home():
     if request.method == 'POST':
         if form.validate_on_submit():
             new_input = format_table(form)
-            set_bookings(new_input)
-            mqtt.publish('booking/new', json.dumps(new_input))
-            flash(f'Reservation submitted for {new_input.get("firstname")} {new_input.get("lastname")}.', 'success')
-            return redirect(url_for('home'))
+            if validate_bookings(new_input, bookings):
+                set_bookings(new_input)
+                mqtt.publish('booking/new', json.dumps(new_input))
+                flash(f'Reservation submitted for {new_input.get("firstname")} {new_input.get("lastname")}.', 'success')
+                return redirect(url_for('home'))
         else:
-            flash('Invalid input. Look below for more information.', 'danger')
+            flash('Invalid form input. Look below for more information.', 'danger')
     return render_template('home.html', bookings=bookings, form=form)
 
 # Read out slot occupancy from cache
 def get_bookings():
     entries = cache.scan(match='slot:*')[1]
     print(entries, file=sys.stderr)
-
     weeks = []
     for week_index in range(7):
         slots = []
         for slot_index in range(4):
-            occupant_slots = count_filter(entries, f'slot:{week_index}:{slot_index}')
-            slots.append(10 - occupant_slots)
+            occupied_slots = count_filter(entries, f'slot:{week_index}:{slot_index}')
+            free_slots = slot_amount - occupied_slots
+            slots.append(f'{free_slots} slots' if free_slots != 1 else '1 slot')
         weeks.append(slots)
     return weeks
+
+# Additional form validation
+def validate_bookings(form_input, cache_bookings):
+    # Check if at leas one time slot is selected
+    if not form_input.get("bookings"):
+        flash('No slot selected. Please select at least one time slot.', 'danger')
+        return False
+    # Check if time slot is fully occupied
+    for form_booking in form_input.get("bookings"):
+        # Convert text value to int, e.g. 3 slots -> 3
+        if int(cache_bookings[form_booking.get("week")][form_booking.get("slot")].split(' ')[0]) <= 0:
+            flash('The time slot you booked is already fully occupied. Please try another slot.', 'danger')
+            return False
+    return True
 
 # Save new input data in cache with the format slot:{week-nr(0-6)}:{slot-nr(0-3)}:occupant-nr(0-9)
 def set_bookings(data):
@@ -58,13 +76,12 @@ def set_bookings(data):
         try:
             hash_name = f'slot:{booking.get("week")}:{booking.get("slot")}'
             used_slots = len(cache.scan(match=f'{hash_name}:*')[1])
-            print(used_slots, file=sys.stderr)
             hash_dict = {
                 'firstname':data['firstname'],
                 'lastname':data['lastname'],
                 'email':data['email']
             }
-            if used_slots < 10:
+            if used_slots < slot_amount:
                 cache.hmset(f'{hash_name}:{used_slots}', hash_dict)
         except redis.exceptions.ConnectionError as exc:
             raise exc
