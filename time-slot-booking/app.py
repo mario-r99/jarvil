@@ -25,6 +25,7 @@ cache = redis.Redis(host='redis', port=6379, charset="utf-8", decode_responses=T
 # Initialize mqtt client
 mqtt = Mqtt(app)
 
+
 # Default page
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -42,6 +43,7 @@ def home():
             flash('Invalid form input. Look below for more information.', 'danger')
     return render_template('home.html', bookings=bookings, form=form)
 
+
 # Read out slot occupancy from cache
 def get_bookings():
     entries = cache.scan(match='slot:*')[1]
@@ -56,35 +58,52 @@ def get_bookings():
         weeks.append(slots)
     return weeks
 
+
 # Additional form validation
 def validate_bookings(form_input, cache_bookings):
-    # Check if at leas one time slot is selected
+
+    # Check if at least one time slot is selected
     if not form_input.get("bookings"):
         flash('No slot selected. Please select at least one time slot.', 'danger')
         return False
+
     # Check if time slot is fully occupied
     for form_booking in form_input.get("bookings"):
         # Convert text value to int, e.g. 3 slots -> 3
         if int(cache_bookings[form_booking.get("week")][form_booking.get("slot")].split(' ')[0]) <= 0:
             flash('The time slot you booked is already fully occupied. Please try another slot.', 'danger')
             return False
+
+    # Check duplicate mail address in same time slot
+    entries = cache.scan(match='slot:*')[1]
+    email = form_input.get("email").encode()
+    for form_booking in form_input.get("bookings"):
+        search_string = f'slot:{form_booking.get("week")}:{form_booking.get("slot")}:{email}'
+        print(f'check if {search_string} is in {entries}...', file=sys.stderr)
+        if search_string in entries:
+            flash('You have booked this time slot already with this email address.', 'danger')
+            return False
+
     return True
 
-# Save new input data in cache with the format slot:{week-nr(0-6)}:{slot-nr(0-3)}:occupant-nr(0-9)
-def set_bookings(data):
-    for booking in data.get("bookings"):
-        try:
+
+# Save new input data in cache with the format slot:{week-nr(0-6)}:{slot-nr(0-3)}:occupant-id(email)
+def set_bookings(form_input):
+    pipe = cache.pipeline()
+    try:
+        for booking in form_input.get("bookings"):
             hash_name = f'slot:{booking.get("week")}:{booking.get("slot")}'
-            used_slots = len(cache.scan(match=f'{hash_name}:*')[1])
+            # used_slots = len(cache.scan(match=f'{hash_name}:*')[1])
             hash_dict = {
-                'firstname':data['firstname'],
-                'lastname':data['lastname'],
-                'email':data['email']
+                'firstname':form_input['firstname'],
+                'lastname':form_input['lastname'],
+                'email':form_input['email']
             }
-            if used_slots < slot_amount:
-                cache.hmset(f'{hash_name}:{used_slots}', hash_dict)
-        except redis.exceptions.ConnectionError as exc:
-            raise exc
+            pipe.hmset(f'{hash_name}:{form_input["email"].encode()}', hash_dict)
+        pipe.execute()
+    except redis.exceptions.ConnectionError as exc:
+        raise exc
+
 
 def count_filter(array, match):
     count = 0
@@ -92,6 +111,7 @@ def count_filter(array, match):
         if match in element:
             count += 1
     return count
+
 
 # Convert table form into booking list
 def format_table(form):
