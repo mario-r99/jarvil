@@ -29,44 +29,54 @@ def home():
     bookings = get_bookings()
     if request.method == 'POST':
         if form.validate_on_submit():
-            set_bookings(form)
-            mqtt.publish('booking/new', json.dumps(format_input_data(form)))
-            flash(f'Reservation submitted for {form.firstname.data} {form.lastname.data}.', 'success')
+            new_input = format_table(form)
+            set_bookings(new_input)
+            mqtt.publish('booking/new', json.dumps(new_input))
+            flash(f'Reservation submitted for {new_input.get("firstname")} {new_input.get("lastname")}.', 'success')
             return redirect(url_for('home'))
         else:
             flash('Invalid input. Look below for more information.', 'danger')
     return render_template('home.html', bookings=bookings, form=form)
 
+# Read out slot occupancy from cache
 def get_bookings():
+    entries = cache.scan(match='slot:*')[1]
+    print(entries, file=sys.stderr)
+
     weeks = []
-    for week in range(7):
+    for week_index in range(7):
         slots = []
-        for slot in range(4):
-            value = cache.get(f'week-{week}-slot-{slot}')
-            if value is None:
-                value = 0
-            slots.append(10 - int(value))
+        for slot_index in range(4):
+            occupant_slots = count_filter(entries, f'slot:{week_index}:{slot_index}')
+            slots.append(10 - occupant_slots)
         weeks.append(slots)
     return weeks
 
-def set_bookings(form):
-    bookings = format_table(form)
-    for booking in bookings:
+# Save new input data in cache with the format slot:{week-nr(0-6)}:{slot-nr(0-3)}:occupant-nr(0-9)
+def set_bookings(data):
+    for booking in data.get("bookings"):
         try:
-            cache.incr(f'week-{booking.get("week")}-slot-{booking.get("slot")}')
+            hash_name = f'slot:{booking.get("week")}:{booking.get("slot")}'
+            used_slots = len(cache.scan(match=f'{hash_name}:*')[1])
+            print(used_slots, file=sys.stderr)
+            hash_dict = {
+                'firstname':data['firstname'],
+                'lastname':data['lastname'],
+                'email':data['email']
+            }
+            if used_slots < 10:
+                cache.hmset(f'{hash_name}:{used_slots}', hash_dict)
         except redis.exceptions.ConnectionError as exc:
             raise exc
 
-# Returning formatted form data
-def format_input_data(form):
-    return {
-        "firstname": form.firstname.data,
-        "lastname": form.lastname.data,
-        "email": form.email.data,
-        "bookings": format_table(form)
-    }
+def count_filter(array, match):
+    count = 0
+    for element in array:
+        if match in element:
+            count += 1
+    return count
 
-# Converting table form into booking list
+# Convert table form into booking list
 def format_table(form):
     # Put all form data into 2-dimensional array
     table = [
@@ -87,4 +97,9 @@ def format_table(form):
                     "week": week_index,
                     "slot": slot_index
                 })
-    return bookings
+    return {
+        "firstname": form.firstname.data,
+        "lastname": form.lastname.data,
+        "email": form.email.data,
+        "bookings": bookings
+    }
