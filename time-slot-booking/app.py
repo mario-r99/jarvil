@@ -1,6 +1,7 @@
 from flask import Flask, render_template, url_for, flash, redirect, request
 from forms import BookingForm
 from flask_mqtt import Mqtt
+from datetime import date, timedelta
 import redis
 import json
 import time
@@ -31,6 +32,7 @@ mqtt = Mqtt(app)
 def home():
     form = BookingForm()
     bookings = get_bookings()
+    week = get_current_week()
     if request.method == 'POST':
         if form.validate_on_submit():
             new_input = format_table(form)
@@ -41,13 +43,13 @@ def home():
                 return redirect(url_for('home'))
         else:
             flash('Invalid form input. Look below for more information.', 'danger')
-    return render_template('home.html', bookings=bookings, form=form)
+    return render_template('home.html', bookings=bookings, form=form, week=week)
 
 
 # Read out slot occupancy from cache
 def get_bookings():
     entries = cache.scan(match='slot:*')[1]
-    print(entries, file=sys.stderr)
+
     weeks = []
     for week_index in range(7):
         slots = []
@@ -79,9 +81,8 @@ def validate_bookings(form_input, cache_bookings):
     email = form_input.get("email").encode()
     for form_booking in form_input.get("bookings"):
         search_string = f'slot:{form_booking.get("week")}:{form_booking.get("slot")}:{email}'
-        print(f'check if {search_string} is in {entries}...', file=sys.stderr)
         if search_string in entries:
-            flash('You have booked this time slot already with this email address.', 'danger')
+            flash('You have already booked this or one of these time slots with this email address.', 'danger')
             return False
 
     return True
@@ -140,3 +141,24 @@ def format_table(form):
         "email": form.email.data,
         "bookings": bookings
     }
+
+
+def get_current_week():
+    today = date.today()
+    monday = today - timedelta(days=today.weekday())
+    tuesday = monday + timedelta(days=1)
+    wednesday = monday + timedelta(days=2)
+    thursday = monday + timedelta(days=3)
+    friday = monday + timedelta(days=4)
+    saturday = monday + timedelta(days=5)
+    sunday = monday + timedelta(days=6)
+    return [
+        f'{monday.strftime("%d.%m.%Y")} - {sunday.strftime("%d.%m.%Y")}',
+        monday.strftime("%b %d"),
+        tuesday.strftime("%b %d"),
+        wednesday.strftime("%b %d"),
+        thursday.strftime("%b %d"),
+        friday.strftime("%b %d"),
+        saturday.strftime("%b %d"),
+        sunday.strftime("%b %d"),
+    ]
