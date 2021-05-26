@@ -1,7 +1,18 @@
 import paho.mqtt.client as mqtt
+from influxdb_client import InfluxDBClient, Point, WritePrecision
+from influxdb_client.client.write_api import SYNCHRONOUS
 
 # Broker definition
 host = "jarvil_mqtt-broker_1"
+
+# You can generate a Token from the "Tokens Tab" in the UI
+token = "V_g3T7i-QyHF3e_uDvBE05MRVKd-234xHwLDACXuw457UnhEBFOVP1Cr5IVb1EclrG6IRS5uBjMbOhMidnu8kA=="
+org = "jarvil"
+bucket = "jarvil-bucket"
+measurement = "environment"
+device = "arduino"
+client = InfluxDBClient(url="http://influxdb:8086", token=token)
+write_api = client.write_api(write_options=SYNCHRONOUS)
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -12,7 +23,11 @@ def on_connect(client, userdata, flags, rc):
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    print(msg.topic+" "+str(msg.payload))
+    decoded_payload =msg.payload.decode('UTF-8')
+    topic = msg.topic.split("/")[-1]
+    print(msg.topic+": "+decoded_payload)
+    data = f"{measurement},host={device} {topic}={decoded_payload}"
+    write_api.write(bucket, org, data)
 
 client = mqtt.Client()
 client.on_connect = on_connect

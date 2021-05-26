@@ -9,12 +9,14 @@ services:
 
   mqtt-client:
     build: ./mqtt-client
+    links:
+      - "influxdb"
 
   brightness-service:
     build: ./brightness-service
     devices:
       - /dev/ttyACM0
-
+  
   grafana:
     image: grafana/grafana
     container_name: grafana
