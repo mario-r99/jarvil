@@ -7,3 +7,8 @@ services:
       - 9001:9001
     volumes:
       - ./mqtt-broker:/mosquitto
+  mqtt-client:
+    build: ./mqtt-client
+    volumes:
+      - ./mqtt-client:/client
+
