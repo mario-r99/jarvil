@@ -2,6 +2,7 @@ version: "2.1"
 services:
   mqtt-broker:
     build: ./mqtt-broker
+    container_name: mqtt-broker
     ports:
       - 1883:1883
       - 9001:9001
@@ -9,6 +10,7 @@ services:
       - ./mqtt-broker:/mosquitto
   time-slot-booking:
     build: ./time-slot-booking
+    container_name: time-slot-booking
     ports:
       - "5000:5000"
     volumes:
@@ -17,4 +19,10 @@ services:
       FLASK_ENV: development
   redis:
     image: redis:alpine
+    container_name: redis
+  redisinsight:
+    container_name: redisinsight
+    ports:
+        - '8001:8001'
+    image: 'redislabs/redisinsight'
 
