@@ -13,7 +13,7 @@ slot_amount = 10
 # Initialize flask server
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8fd4b5b09d72052a2ef9e200dc3a990e'
-app.config['MQTT_BROKER_URL'] = '192.168.178.17'
+app.config['MQTT_BROKER_URL'] = 'mqtt-broker'
 app.config['MQTT_BROKER_PORT'] = 1883
 app.config['MQTT_USERNAME'] = ''
 app.config['MQTT_PASSWORD'] = ''
@@ -48,8 +48,8 @@ def home():
 
 # Read out slot occupancy from cache
 def get_bookings():
-    entries = cache.scan(match='slot:*')[1]
-
+    entries = cache.scan(match='slot:*', count=280)[1]
+    print(f'CURRENT ENTRIES: {entries}', file=sys.stderr)
     weeks = []
     for week_index in range(7):
         slots = []
@@ -58,6 +58,7 @@ def get_bookings():
             free_slots = slot_amount - occupied_slots
             slots.append(f'{free_slots} slots' if free_slots != 1 else '1 slot')
         weeks.append(slots)
+    # print(f'CURRENT WEEKS: {weeks}', file=sys.stderr)
     return weeks
 
 
@@ -77,8 +78,8 @@ def validate_bookings(form_input, cache_bookings):
             return False
 
     # Check duplicate mail address in same time slot
-    entries = cache.scan(match='slot:*')[1]
-    email = form_input.get("email").encode()
+    entries = cache.scan(match='slot:*', count=280)[1]
+    email = form_input.get("email")
     for form_booking in form_input.get("bookings"):
         search_string = f'slot:{form_booking.get("week")}:{form_booking.get("slot")}:{email}'
         if search_string in entries:
@@ -91,16 +92,17 @@ def validate_bookings(form_input, cache_bookings):
 # Save new input data in cache with the format slot:{week-nr(0-6)}:{slot-nr(0-3)}:occupant-id(email)
 def set_bookings(form_input):
     pipe = cache.pipeline()
+    for booking in form_input.get("bookings"):
+        hash_name = f'slot:{booking.get("week")}:{booking.get("slot")}'
+        # used_slots = len(cache.scan(match=f'{hash_name}:*')[1])
+        hash_dict = {
+            'firstname':form_input['firstname'],
+            'lastname':form_input['lastname'],
+            'email':form_input['email']
+        }
+        print(f'NEW ENTRY: {hash_name}:{form_input["email"]}', file=sys.stderr)
+        pipe.hmset(f'{hash_name}:{form_input["email"]}', hash_dict)
     try:
-        for booking in form_input.get("bookings"):
-            hash_name = f'slot:{booking.get("week")}:{booking.get("slot")}'
-            # used_slots = len(cache.scan(match=f'{hash_name}:*')[1])
-            hash_dict = {
-                'firstname':form_input['firstname'],
-                'lastname':form_input['lastname'],
-                'email':form_input['email']
-            }
-            pipe.hmset(f'{hash_name}:{form_input["email"].encode()}', hash_dict)
         pipe.execute()
     except redis.exceptions.ConnectionError as exc:
         raise exc
