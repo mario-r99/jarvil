@@ -21,8 +21,8 @@ services:
     image: redis:alpine
     container_name: redis
   redisinsight:
+    image: 'redislabs/redisinsight'
     container_name: redisinsight
     ports:
         - '8001:8001'
-    image: 'redislabs/redisinsight'
 
