@@ -1,6 +1,7 @@
 from flask import Flask, render_template, url_for, flash, redirect, request
 from forms import BookingForm
 from flask_mqtt import Mqtt
+from flask_apscheduler import APScheduler
 from datetime import date, timedelta
 import redis
 import json
@@ -25,6 +26,17 @@ cache = redis.Redis(host='redis', port=6379, charset="utf-8", decode_responses=T
 
 # Initialize mqtt client
 mqtt = Mqtt(app)
+
+# Initialize background scheduler
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
+
+
+# Delete redis cache every monday on 00:00
+@scheduler.task('cron', id='clear_cache', day_of_week='mon', hour='0', minute='0', timezone='utc')
+def clear_cache():
+    cache.flushdb()
 
 
 # Default page
@@ -145,6 +157,7 @@ def format_table(form):
     }
 
 
+# Get current week to show on dashboard
 def get_current_week():
     today = date.today()
     monday = today - timedelta(days=today.weekday())

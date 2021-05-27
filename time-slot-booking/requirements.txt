@@ -2,4 +2,5 @@ paho-mqtt
 flask
 flask-wtf
 flask-mqtt
+flask-apscheduler
 redis
