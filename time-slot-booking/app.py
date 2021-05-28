@@ -34,7 +34,7 @@ scheduler.start()
 
 
 # Delete redis cache every monday on 00:00
-@scheduler.task('cron', id='clear_cache', day_of_week='mon', hour='0', minute='0', timezone='utc')
+@scheduler.task('cron', id='clear_cache', day_of_week='mon', hour='0', minute='0')
 def clear_cache():
     cache.flushdb()
 
@@ -60,11 +60,14 @@ def home():
 
 # Read out slot occupancy from cache
 def get_bookings():
+    # Scan all entries in redis starting with "slot", counting 7 (weeks) * 4 (times) * 10 (slots) = 280 times
     entries = cache.scan(match='slot:*', count=280)[1]
     print(f'CURRENT ENTRIES: {entries}', file=sys.stderr)
     weeks = []
+    # Setting range to 7 week days, adapting to week definition in home.html
     for week_index in range(7):
         slots = []
+        # Setting range to 4 slots, adapting to slot definition in home.html
         for slot_index in range(4):
             occupied_slots = count_filter(entries, f'slot:{week_index}:{slot_index}')
             free_slots = slot_amount - occupied_slots
