@@ -3,7 +3,7 @@ import pyfirmata
 import time
 
 # Global definitions
-broker_host = "192.168.178.100"
+broker_host = "localhost"
 mqtt_topic = "room/brightness"
 readout_frequency = 1
 
@@ -15,7 +15,7 @@ client.connect(broker_host)
 client.loop_start()
 
 # Setup arduino connection
-board = pyfirmata.Arduino('/dev/ttyACM0')
+board = pyfirmata.Arduino('COM6')
 board.analog[0].mode = pyfirmata.INPUT  
 it = pyfirmata.util.Iterator(board)  
 it.start()
