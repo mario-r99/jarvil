@@ -1,4 +1,4 @@
-name: BalenaCloud Push
+name: BalenaCloud Push Pi-1
 
 on:
   push:
@@ -13,4 +13,5 @@ jobs:
     - uses: amingilani/push-to-balenacloud@v1.0.1
       with:
         api-token: ${{secrets.BALENA_API_TOKEN}}
-        application-name: ${{secrets.BALENA_APPLICATION_NAME}}
+        application-name: "jarvil-pi-1"
+        application-path: "./docker/development/pi-1"
