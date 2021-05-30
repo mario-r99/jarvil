@@ -1,0 +1,10 @@
+# mqtt broker with influxdb and grafana
+version: "2.1"
+services:
+  mqtt-broker:
+    build: ../../src/mqtt-broker
+    container_name: mqtt-broker
+    restart: always
+    ports:
+      - 1883:1883
+      - 9001:9001

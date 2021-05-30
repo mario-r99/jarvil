@@ -1,20 +1,21 @@
+# development
 version: "2.1"
 services:
   mqtt-broker:
-    build: ./mqtt-broker
+    build: ../../src/mqtt-broker
     container_name: mqtt-broker
     ports:
       - 1883:1883
       - 9001:9001
     volumes:
-      - ./mqtt-broker:/mosquitto
+      - ../../src/mqtt-broker:/mosquitto
   time-slot-booking:
-    build: ./time-slot-booking
+    build: ../../src/time-slot-booking
     container_name: time-slot-booking
     ports:
       - "5000:5000"
     volumes:
-      - ./time-slot-booking:/app
+      - ../../src/time-slot-booking:/app
     environment:
       FLASK_ENV: development
   redis:
