@@ -1,12 +1,6 @@
+# time slot booking with redis cache
 version: "2.1"
 services:
-  mqtt-broker:
-    build: ../../src/mqtt-broker
-    container_name: mqtt-broker
-    restart: always
-    ports:
-      - 1883:1883
-      - 9001:9001
   time-slot-booking:
     build: ../../src/time-slot-booking
     container_name: time-slot-booking
