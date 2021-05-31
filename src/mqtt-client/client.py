@@ -3,7 +3,7 @@ from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 # Broker definition
-host = "jarvil_mqtt-broker_1"
+host = "mqtt-broker"
 
 # You can generate a Token from the "Tokens Tab" in the UI
 token = "V_g3T7i-QyHF3e_uDvBE05MRVKd-234xHwLDACXuw457UnhEBFOVP1Cr5IVb1EclrG6IRS5uBjMbOhMidnu8kA=="
