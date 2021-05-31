@@ -14,4 +14,4 @@ jobs:
       with:
         api-token: ${{ secrets.BALENA_API_TOKEN }}
         application-name: "jarvil-pi-3"
-        application-path: "./docker/development/pi-3"
+        application-path: "../../docker/development/pi-3"
