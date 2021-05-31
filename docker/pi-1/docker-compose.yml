@@ -1,0 +1,11 @@
+# time slot booking with redis cache
+version: "2.1"
+services:
+  time-slot-booking:
+    build: ../../src/time-slot-booking
+    container_name: time-slot-booking
+    ports:
+      - "5000:5000"
+  redis:
+    image: redis:alpine
+    container_name: redis
