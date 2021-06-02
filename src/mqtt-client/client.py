@@ -9,8 +9,6 @@ host = "mqtt-broker"
 token = "V_g3T7i-QyHF3e_uDvBE05MRVKd-234xHwLDACXuw457UnhEBFOVP1Cr5IVb1EclrG6IRS5uBjMbOhMidnu8kA=="
 org = "jarvil"
 bucket = "jarvil-bucket"
-measurement = "environment"
-device = "arduino"
 client = InfluxDBClient(url="http://influxdb:8086", token=token)
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
@@ -25,8 +23,10 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     decoded_payload =msg.payload.decode('UTF-8')
     topic = msg.topic.split("/")[-1]
+    device_id = msg.topic.split("/")[0]
+    service_name = msg.topic.split("/")[1]
     print(msg.topic+": "+decoded_payload)
-    data = f"{measurement},host={device} {topic}={decoded_payload}"
+    data = f"{service_name},host={device_id} {topic}={decoded_payload}"
     write_api.write(bucket, org, data)
 
 client = mqtt.Client()

@@ -4,6 +4,7 @@ import time
 
 # Global definitions
 broker_host = "localhost"
+usb_port = 'COM6'
 mqtt_topic = "room/brightness"
 readout_frequency = 1
 
@@ -15,7 +16,7 @@ client.connect(broker_host)
 client.loop_start()
 
 # Setup arduino connection
-board = pyfirmata.Arduino('COM6')
+board = pyfirmata.Arduino(usb_port)
 board.analog[0].mode = pyfirmata.INPUT  
 it = pyfirmata.util.Iterator(board)  
 it.start()
