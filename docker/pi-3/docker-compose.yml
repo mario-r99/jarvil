@@ -1,3 +1,9 @@
 # mqtt endpoint devices
 version: "2.1"
 services:
+    brightness-service:
+        build: ../../src/brightness-service-pi
+        volumes:
+          - ../../src/brightness-service-pi:/app
+        devices:
+          - /dev/ttyACM0
