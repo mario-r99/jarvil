@@ -1,0 +1,39 @@
+name: BalenaCloud Push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  balena-push:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - uses: canastro/copy-action@0.0.2
+      with:
+        source: "docker/pi-1/docker-compose.yml"
+        target: "docker-compose.yml"
+    - uses: amingilani/push-to-balenacloud@v1.0.1
+      with:
+        api-token: ${{ secrets.BALENA_API_TOKEN }}
+        application-name: "jarvil-pi-1"
+    
+    - uses: canastro/copy-action@0.0.2
+      with:
+        source: "docker/pi-2/docker-compose.yml"
+        target: "docker-compose.yml"
+    - uses: amingilani/push-to-balenacloud@v1.0.1
+      with:
+        api-token: ${{ secrets.BALENA_API_TOKEN }}
+        application-name: "jarvil-pi-2"
+        
+    - uses: canastro/copy-action@0.0.2
+      with:
+        source: "docker/pi-3/docker-compose.yml"
+        target: "docker-compose.yml"
+    - uses: amingilani/push-to-balenacloud@v1.0.1
+      with:
+        api-token: ${{ secrets.BALENA_API_TOKEN }}
+        application-name: "jarvil-pi-3"
