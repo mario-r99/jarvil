@@ -1,8 +1,10 @@
 # mqtt broker with influxdb and grafana
 version: "2.1"
 services:
+  
   mqtt-broker:
-    build: ../../src/mqtt-broker
+    # root path due to github actions file copy
+    build: ./services/mqtt-broker
     container_name: mqtt-broker
     restart: always
     ports:
@@ -10,32 +12,35 @@ services:
       - 9001:9001
     
   mqtt-client:
-    build: ../../src/mqtt-client
+    # root path due to github actions file copy
+    build: ./services/mqtt-client
     volumes:
-      - ../../src/mqtt-client:/client
+      - ./services/mqtt-client:/client
     links:
       - "influxdb"
   
   grafana:
+    # root path due to github actions file copy
     image: grafana/grafana
     container_name: grafana
     restart: always
     ports:
       - 3000:3000
     volumes:
-      - ../../src/data/grafana_data:/var/lib/grafana
+      - ./services/data/grafana_data:/var/lib/grafana
     depends_on:
       - influxdb
 
   influxdb:
+    # root path due to github actions file copy
     image: influxdb:latest
     container_name: influxdb
     restart: always
     ports:
       - 8086:8086
     volumes:
-      - ../../src/data/influxdb_data:/var/lib/influxdb2
-      - ../../src/data/influxdb_config:/etc/influxdb2
+      - ./services/data/influxdb_data:/var/lib/influxdb2
+      - ./services/data/influxdb_config:/etc/influxdb2
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=grafana
