@@ -1,4 +1,4 @@
-# mqtt broker with influxdb and grafana
+# time slot booking with redis cache
 version: "2.1"
 services:
   mqtt-broker:
@@ -8,14 +8,24 @@ services:
     ports:
       - 1883:1883
       - 9001:9001
-    
+
+  time-slot-booking:
+    build: ../../src/time-slot-booking
+    container_name: time-slot-booking
+    ports:
+      - "5000:5000"
+      
+  redis:
+    image: redis:alpine
+    container_name: redis
+
   mqtt-client:
     build: ../../src/mqtt-client
     volumes:
       - ../../src/mqtt-client:/client
     links:
       - "influxdb"
-  
+
   grafana:
     image: grafana/grafana
     container_name: grafana
