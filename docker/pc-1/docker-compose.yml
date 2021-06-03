@@ -1,46 +1,51 @@
-# mqtt broker with influxdb and grafana
+# time slot booking with redis cache
 version: "2.1"
 services:
-  
   mqtt-broker:
-    # root path due to github actions file copy
-    build: ./services/mqtt-broker
+    build: ../../src/mqtt-broker
     container_name: mqtt-broker
     restart: always
     ports:
       - 1883:1883
       - 9001:9001
-    
+
+  time-slot-booking:
+    build: ../../src/time-slot-booking
+    container_name: time-slot-booking
+    ports:
+      - "5000:5000"
+      
+  redis:
+    image: redis:alpine
+    container_name: redis
+
   mqtt-client:
-    # root path due to github actions file copy
-    build: ./services/mqtt-client
+    build: ../../src/mqtt-client
     volumes:
-      - ./services/mqtt-client:/client
+      - ../../src/mqtt-client:/client
     links:
       - "influxdb"
-  
+
   grafana:
-    # root path due to github actions file copy
     image: grafana/grafana
     container_name: grafana
     restart: always
     ports:
       - 3000:3000
     volumes:
-      - ./services/data/grafana_data:/var/lib/grafana
+      - ../../src/data/grafana_data:/var/lib/grafana
     depends_on:
       - influxdb
 
   influxdb:
-    # root path due to github actions file copy
     image: influxdb:latest
     container_name: influxdb
     restart: always
     ports:
       - 8086:8086
     volumes:
-      - ./services/data/influxdb_data:/var/lib/influxdb2
-      - ./services/data/influxdb_config:/etc/influxdb2
+      - ../../src/data/influxdb_data:/var/lib/influxdb2
+      - ../../src/data/influxdb_config:/etc/influxdb2
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=grafana
