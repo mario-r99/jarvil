@@ -13,17 +13,17 @@ StandartFirmata building arduino code from remote devices via USB, using pyFirma
 
 To configure a new arduino device, please build the StandartFirmata_Bluetooth.ino or StandartFirmata.ino via Arduino IDE USB connection
 
-## Run Configuration Options
+## System Setup Instructions
 
-There are four configurations in which the system can be run. These are:
+To setup the system one needs to start the containers in each pi folder, under jarvil\docker, on their respective Raspberry Pi's. In order to run a container one must run "docker-compose up -d" in its directory. Each container contains the following:
 
-1. The configuration under jarvil\docker\development has the following services: mqtt-broker, time-slot-booking, redis and redisinsight. In order to run this configuration one can run "docker-compose up -d" in this directory.
+1. The development container contains all services for live development.
 
-2. The configuration under jarvil\docker\pi-1 has the following services: time-slot-booking and redis. In order to run this configuration one can run "docker-compose up -d" in this directory.
+2. The pi-1 container contains time slot booking services.
 
-3. The configuration under jarvil\docker\pi-2 has the following services: mqtt-broker. In order to run this configuration one can run "docker-compose up -d" in this directory.
+3. The pi-2 container contains mqtt broker and analysis services.
 
-4. The configuration under jarvil\docker\pi-3 has the following services: none. In order to run this configuration one can run "docker-compose up -d" in this directory.
+4. The pi-3 container contains mqtt endpoint services.
 
 ## Time Slot Booking Service
 
