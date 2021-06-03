@@ -25,7 +25,7 @@ To setup the system one needs to start the containers in each pi folder, under j
 
 4. The pi-3 container contains mqtt endpoint services.
 
-## Time Slot Booking Service
+### Time Slot Booking Service
 
 In order to visit the library one must book a time slot on the booking interface. The booking interface is accessible at http://localhost:5000/. When booking a slot one must select at least one 6 hour slot and fill your first name, last name and email adress and submit your reservation. First and last names have a minimum of 2 characters.
 
