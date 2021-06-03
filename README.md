@@ -29,6 +29,8 @@ To setup the system one needs to start the containers in each pi folder, under j
 
 In order to visit the library one must book a time slot on the booking interface. The booking interface is accessible at http://localhost:5000/. When booking a slot one must select at least one 6 hour slot and fill your first name, last name and email adress and submit your reservation. First and last names have a minimum of 2 characters.
 
+The time slot on the booking interface's data is cached on Redis. Redis can be accessed on http://localhost:6379/ and the cache can be viewed there.
+
 ### Full Documentation
 
 See the [Wiki](https://github.com/mario-r99/smart-office/wiki/) for full documentation and other information.
