@@ -31,6 +31,6 @@ In order to visit the library one must book a time slot on the booking interface
 
 The time slot on the booking interface's data is cached on Redis. Redis can be accessed on http://localhost:6379/ and the cache can be viewed there.
 
-### Full Documentation
+## Full Documentation
 
 See the [Wiki](https://github.com/mario-r99/smart-office/wiki/) for full documentation and other information.
