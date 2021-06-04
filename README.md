@@ -13,7 +13,7 @@ StandartFirmata building arduino code from remote devices via USB, using pyFirma
 
 To configure a new arduino device, please build the StandartFirmata_Bluetooth.ino or StandartFirmata.ino via Arduino IDE USB connection
 
-## System Setup Instructions
+### System Setup Instructions
 
 To setup the system one needs to start the containers in each pi folder, under jarvil\docker, on their respective Raspberry Pi's. In order to run a container one must run "docker-compose up -d" in its directory. Each container contains the following:
 
@@ -24,6 +24,14 @@ To setup the system one needs to start the containers in each pi folder, under j
 3. The pi-2 container contains mqtt broker and analysis services.
 
 4. The pi-3 container contains mqtt endpoint services.
+
+### MQTT Broker - Mosquitto 
+
+The system uses Mosquitto, a mqtt broker, to communicate between system components ensuring indirect communication.
+
+### Database - Influxdb
+
+The system uses Influxdb as a database to store all data aquired by the system and that is then used by the system to make decisions. Influxdb is a time series database.
 
 ### Time Slot Booking Service
 
