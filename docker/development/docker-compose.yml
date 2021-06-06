@@ -2,21 +2,21 @@
 version: "2.1"
 services:
   mqtt-broker:
-    build: ../../src/mqtt-broker
+    build: ../../services/mqtt-broker
     container_name: mqtt-broker
     ports:
       - 1883:1883
       - 9001:9001
     volumes:
-      - ../../src/mqtt-broker:/mosquitto
+      - ../../services/mqtt-broker:/mosquitto
 
   time-slot-booking:
-    build: ../../src/time-slot-booking
+    build: ../../services/time-slot-booking
     container_name: time-slot-booking
     ports:
       - "5000:5000"
     volumes:
-      - ../../src/time-slot-booking:/app
+      - ../../services/time-slot-booking:/app
     environment:
       FLASK_ENV: development
 
@@ -31,13 +31,13 @@ services:
         - '8001:8001'
 
   mqtt-client:
-    build: ../../src/mqtt-client
+    build: ../../services/mqtt-client
     volumes:
-      - ../../src/mqtt-client:/client
+      - ../../services/mqtt-client:/client
     links:
       - "influxdb"
     volumes:
-      - ../../src/mqtt-client:/client
+      - ../../services/mqtt-client:/client
 
   grafana:
     image: grafana/grafana
@@ -46,7 +46,7 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ../../src/data/grafana_data:/var/lib/grafana
+      - ../../services/data/grafana_data:/var/lib/grafana
     depends_on:
       - influxdb
 
@@ -57,8 +57,8 @@ services:
     ports:
       - 8086:8086
     volumes:
-      - ../../src/data/influxdb_data:/var/lib/influxdb2
-      - ../../src/data/influxdb_config:/etc/influxdb2
+      - ../../services/data/influxdb_data:/var/lib/influxdb2
+      - ../../services/data/influxdb_config:/etc/influxdb2
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=grafana
