@@ -27,11 +27,11 @@ To setup the system one needs to start the containers in each pi folder, under j
 
 ### MQTT Broker - Mosquitto 
 
-The system uses Mosquitto, a mqtt broker, to communicate between system components ensuring indirect communication.
+The system uses Mosquitto, a mqtt broker, to communicate between system components, ensuring indirect communication. The mqtt broker is connected to port 1883, so if one were to connect a mqtt spy it should also be connected to port 1883. The mqtt spy used for testing was MQTT-Explorer: https://github.com/thomasnordquist/MQTT-Explorer/.
 
 ### Database - Influxdb
 
-The system uses Influxdb as a database to store all data aquired by the system and that is then used by the system to make decisions. Influxdb is a time series database.
+The system uses Influxdb as a database to store all data aquired by the system and that is then used by the system to make decisions. Influxdb is a time series database. The database is connected to port 8086 and can be accessed at http://localhost:8086/. The default login and password is "grafana" and "password" respectively.
 
 ### Time Slot Booking Service
 
