@@ -45,4 +45,4 @@ $RECYCLE.BIN/
 *$py.class
 
 # Cache
-src/data*
+data*
