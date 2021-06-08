@@ -18,7 +18,8 @@ services:
     volumes:
       - ../../services/time-slot-booking:/app
     environment:
-      FLASK_ENV: development
+      - FLASK_ENV=development
+      - MQTT_HOST=mqtt-broker
 
   redis:
     image: redis:alpine
@@ -38,6 +39,8 @@ services:
       - "influxdb"
     volumes:
       - ../../services/mqtt-client:/client
+    environment:
+      - MQTT_HOST=mqtt-broker
 
   grafana:
     image: grafana/grafana
