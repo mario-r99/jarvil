@@ -19,9 +19,9 @@ To setup the system one needs to start the containers in each pi folder, under j
 
 1. The development container contains all services for live development.
 
-2. The pi-1 container contains time slot booking services.
+2. The pi-1 container contains mqtt broker and analysis services.
 
-3. The pi-2 container contains mqtt broker and analysis services.
+3. The pi-2 container contains time slot booking services.
 
 4. The pi-3 container contains mqtt endpoint services.
 

@@ -1,14 +1,43 @@
-# time slot booking with redis cache
+# mqtt broker with influxdb and grafana
 version: "2.1"
 services:
   
-  time-slot-booking:
+  mqtt-broker:
     # root path due to github actions file copy
-    build: ./services/time-slot-booking
-    container_name: time-slot-booking
+    build: ./services/mqtt-broker
+    container_name: mqtt-broker
+    restart: always
     ports:
-      - "5000:5000"
+      - 1883:1883
+      - 9001:9001
+    
+  mqtt-client:
+    # root path due to github actions file copy
+    build: ./services/mqtt-client
+    links:
+      - "influxdb"
+  
+  grafana:
+    # root path due to github actions file copy
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    ports:
+      - 3000:3000
+    depends_on:
+      - influxdb
 
-  redis:
-    image: redis:alpine
-    container_name: redis
+  influxdb:
+    # root path due to github actions file copy
+    image: influxdb:latest
+    container_name: influxdb
+    restart: always
+    ports:
+      - 8086:8086
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=grafana
+      - DOCKER_INFLUXDB_INIT_PASSWORD=password
+      - DOCKER_INFLUXDB_INIT_ORG=jarvil
+      - DOCKER_INFLUXDB_INIT_BUCKET=jarvil-bucket
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=V_g3T7i-QyHF3e_uDvBE05MRVKd-234xHwLDACXuw457UnhEBFOVP1Cr5IVb1EclrG6IRS5uBjMbOhMidnu8kA==
