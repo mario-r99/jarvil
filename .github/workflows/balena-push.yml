@@ -6,11 +6,10 @@ on:
       - main
 
 jobs:
-  balena-push:
+  balena-push-pi-1:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    
     - uses: canastro/copy-action@0.0.2
       with:
         source: "docker/pi-1/docker-compose.yml"
@@ -20,6 +19,10 @@ jobs:
         api-token: ${{ secrets.BALENA_API_TOKEN }}
         application-name: "jarvil-pi-1"
     
+  balena-push-pi-2:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
     - uses: canastro/copy-action@0.0.2
       with:
         source: "docker/pi-2/docker-compose.yml"
@@ -28,7 +31,11 @@ jobs:
       with:
         api-token: ${{ secrets.BALENA_API_TOKEN }}
         application-name: "jarvil-pi-2"
-        
+    
+  balena-push-pi-3:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
     - uses: canastro/copy-action@0.0.2
       with:
         source: "docker/pi-3/docker-compose.yml"

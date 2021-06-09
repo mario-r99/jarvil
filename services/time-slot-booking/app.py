@@ -7,6 +7,7 @@ import redis
 import json
 import time
 import sys
+import os
 
 # Initialize room
 slot_amount = 10
@@ -14,7 +15,7 @@ slot_amount = 10
 # Initialize flask server
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8fd4b5b09d72052a2ef9e200dc3a990e'
-app.config['MQTT_BROKER_URL'] = 'mqtt-broker'
+app.config['MQTT_BROKER_URL'] = os.environ['MQTT_HOST']
 app.config['MQTT_BROKER_PORT'] = 1883
 app.config['MQTT_USERNAME'] = ''
 app.config['MQTT_PASSWORD'] = ''

@@ -1,9 +1,10 @@
 import paho.mqtt.client as mqtt
 import pyfirmata
 import time
+import os
 
 # Global definitions
-broker_host = "mqtt-broker"
+broker_host = os.environ['MQTT_HOST']
 usb_port = '/dev/ttyACM0'
 brightness_topic = "pi-3/environment-service/value/brightness/state"
 readout_frequency = 1
