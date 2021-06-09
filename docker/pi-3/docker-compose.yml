@@ -2,11 +2,12 @@
 version: "2.1"
 services:
 
-  brightness-service:
+  climate-service:
     # root path due to github actions file copy
-    build: ./services/environment-service-pi
+    build: ./services/climate-service-pi
     devices:
       - /dev/ttyACM0
     environment:
-      - FLASK_ENV=development
       - MQTT_HOST=mqtt-broker
+      - USB_PORT=/dev/ttyACM0
+      - BRIGHTNESS_PORT = 0
