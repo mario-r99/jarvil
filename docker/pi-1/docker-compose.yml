@@ -16,6 +16,8 @@ services:
     build: ./services/mqtt-client
     links:
       - "influxdb"
+    environment:
+      - MQTT_HOST=mqtt-broker
   
   grafana:
     # root path due to github actions file copy
