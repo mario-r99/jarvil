@@ -5,7 +5,7 @@ import time
 # Global definitions
 broker_host = "mqtt-broker"
 usb_port = '/dev/ttyACM0'
-mqtt_topic = "room/brightness"
+brightness_topic = "pi-3/environment-service/value/brightness/state"
 readout_frequency = 1
 
 # Client initialization
@@ -25,5 +25,5 @@ it.start()
 while True:
     brightness = board.analog[0].read()
     print("Publishing brightness:", brightness)
-    client.publish(mqtt_topic, brightness)
+    client.publish(brightness_topic, brightness)
     time.sleep(readout_frequency)
