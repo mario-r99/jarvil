@@ -7,7 +7,7 @@ import json
 broker_host = "localhost"
 usb_port = 'COM6'
 brightness_port = 0
-sensors_topic = "pc-3/climate-service/value/sensors/state"
+sensors_topic = "pc-1/climate-service/value/sensors/state"
 readout_frequency = 1
 
 # Client initialization
