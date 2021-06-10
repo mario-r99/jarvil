@@ -11,7 +11,7 @@ topic = "+/+/value/+/state"
 # You can generate a Token from the "Tokens Tab" in the UI
 token = os.environ['TOKEN']
 org = os.environ['ORG']
-bucket = os.environ['jarvil-bucket']
+bucket = os.environ['BUCKET']
 client = InfluxDBClient(url="http://influxdb:8086", token=token)
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
