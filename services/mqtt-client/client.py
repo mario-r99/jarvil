@@ -25,16 +25,12 @@ def on_connect(client, userdata, flags, rc):
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
     decoded_payload =msg.payload.decode('UTF-8')
-    print("Recived value: "+decoded_payload+", on topic: "+msg.topic)
-    value_name = msg.topic.split("/")[-2]
+    value_name = msg.topic.split("/")[-1]
     device_id = msg.topic.split("/")[0]
     service_name = msg.topic.split("/")[1]
-    switcher = {
-        "climate-service": log_climate(service_name,device_id,value_name,decoded_payload),
-        "time-slot-booking": log_time_slot_booking(service_name,device_id,value_name,decoded_payload)
-    }
-# TODO: ad lambda method for switch
-    switcher.get(service_name)
+    print(msg.topic+": "+decoded_payload)
+    data = f"{service_name},host={device_id} {value_name}={decoded_payload}"
+    write_api.write(bucket, org, data)
 
 client = mqtt.Client()
 client.on_connect = on_connect
