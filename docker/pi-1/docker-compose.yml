@@ -18,6 +18,9 @@ services:
       - "influxdb"
     environment:
       - MQTT_HOST=mqtt-broker
+      - ORG=jarvil
+      - BUCKET=jarvil-bucket
+      - TOCKEN=V_g3T7i-QyHF3e_uDvBE05MRVKd-234xHwLDACXuw457UnhEBFOVP1Cr5IVb1EclrG6IRS5uBjMbOhMidnu8kA==
   
   grafana:
     # root path due to github actions file copy

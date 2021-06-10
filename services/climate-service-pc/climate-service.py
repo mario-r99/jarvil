@@ -1,12 +1,14 @@
 import paho.mqtt.client as mqtt
 import pyfirmata
 import time
+import json
 
 # Global definitions
 broker_host = "localhost"
 usb_port = 'COM6'
 brightness_port = 0
-brightness_topic = "pc/climate-service/value/brightness/state"
+sensors_topic = "pc-1/climate-service/value/sensors/state"
+
 readout_frequency = 1
 
 # Client initialization
@@ -24,7 +26,22 @@ it.start()
 
 # Sensor readout loop
 while True:
-    brightness = board.analog[brightness_port].read()
-    print("Publishing brightness:", brightness)
-    client.publish(brightness_topic, brightness)
+    brightness_state = board.analog[brightness_port].read()
+    # TODO
+    temperature_state = 0.0
+    # TODO
+    humidity_state = 0.0
+
+    if (brightness_state == None or temperature_state == None or humidity_state == None):
+        continue
+
+    sensor_status = {"brightness":brightness_state,
+                     "temperature":temperature_state,
+                     "humidity":humidity_state}
+    
+    sensor_status_out = json.dumps(sensor_status)
+
+    print("Publishing brightness:", sensor_status_out)
+    client.publish(sensors_topic, sensor_status_out)
+
     time.sleep(readout_frequency)

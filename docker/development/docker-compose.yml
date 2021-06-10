@@ -33,6 +33,7 @@ services:
 
   mqtt-client:
     build: ../../services/mqtt-client
+    container_name: mqtt-client
     volumes:
       - ../../services/mqtt-client:/client
     links:
@@ -41,6 +42,10 @@ services:
       - ../../services/mqtt-client:/client
     environment:
       - MQTT_HOST=mqtt-broker
+      - ORG=jarvil
+      - BUCKET=jarvil-bucket
+      - TOKEN=V_g3T7i-QyHF3e_uDvBE05MRVKd-234xHwLDACXuw457UnhEBFOVP1Cr5IVb1EclrG6IRS5uBjMbOhMidnu8kA==
+    
 
   grafana:
     image: grafana/grafana
