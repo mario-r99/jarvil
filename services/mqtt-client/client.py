@@ -9,7 +9,7 @@ host = os.environ['MQTT_HOST']
 topic = "+/+/value/+/state"
 
 # You can generate a Token from the "Tokens Tab" in the UI
-token = os.environ['TOCKEN']
+token = os.environ['TOKEN']
 org = os.environ['ORG']
 bucket = os.environ['jarvil-bucket']
 client = InfluxDBClient(url="http://influxdb:8086", token=token)
