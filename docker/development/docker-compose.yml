@@ -33,6 +33,7 @@ services:
 
   mqtt-client:
     build: ../../services/mqtt-client
+    container_name: mqtt-client
     volumes:
       - ../../services/mqtt-client:/client
     links:
