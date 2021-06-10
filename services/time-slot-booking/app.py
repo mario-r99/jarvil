@@ -4,6 +4,7 @@ from flask_mqtt import Mqtt
 from flask_apscheduler import APScheduler
 from datetime import date, timedelta
 import redis
+import secrets
 import json
 import time
 import sys
@@ -48,7 +49,7 @@ def home():
     week = get_current_week()
     if request.method == 'POST':
         if form.validate_on_submit():
-            new_input = format_table(form)
+            new_input = process_form(form)
             if validate_bookings(new_input, bookings):
                 set_bookings(new_input)
                 mqtt.publish('booking/new', json.dumps(new_input))
@@ -114,7 +115,8 @@ def set_bookings(form_input):
         hash_dict = {
             'firstname':form_input['firstname'],
             'lastname':form_input['lastname'],
-            'email':form_input['email']
+            'email':form_input['email'],
+            'token':booking.get('token')
         }
         print(f'NEW ENTRY: {hash_name}:{form_input["email"]}', file=sys.stderr)
         pipe.hmset(f'{hash_name}:{form_input["email"]}', hash_dict)
@@ -124,6 +126,7 @@ def set_bookings(form_input):
         raise exc
 
 
+# Count matching entries in array
 def count_filter(array, match):
     count = 0
     for element in array:
@@ -133,7 +136,7 @@ def count_filter(array, match):
 
 
 # Convert table form into booking list
-def format_table(form):
+def process_form(form):
     # Put all form data into 2-dimensional array
     table = [
         [form.m1.data, form.m2.data, form.m3.data, form.m4.data],
@@ -151,7 +154,8 @@ def format_table(form):
             if slot == True:
                 bookings.append({
                     "week": week_index,
-                    "slot": slot_index
+                    "slot": slot_index,
+                    "token": secrets.token_urlsafe(16)
                 })
     return {
         "firstname": form.firstname.data,
