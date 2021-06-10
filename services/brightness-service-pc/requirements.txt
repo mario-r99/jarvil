@@ -1,2 +1,0 @@
-pip install --no-cache-dir -r  paho-mqtt
-pip install --no-cache-dir -r  pyfirmata

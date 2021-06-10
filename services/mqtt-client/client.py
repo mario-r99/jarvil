@@ -23,11 +23,11 @@ def on_connect(client, userdata, flags, rc):
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
     decoded_payload =msg.payload.decode('UTF-8')
-    topic = msg.topic.split("/")[-1]
+    value_name = msg.topic.split("/")[-1]
     device_id = msg.topic.split("/")[0]
     service_name = msg.topic.split("/")[1]
     print(msg.topic+": "+decoded_payload)
-    data = f"{service_name},host={device_id} {topic}={decoded_payload}"
+    data = f"{service_name},host={device_id} {value_name}={decoded_payload}"
     write_api.write(bucket, org, data)
 
 client = mqtt.Client()
