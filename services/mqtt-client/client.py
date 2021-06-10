@@ -10,11 +10,34 @@ host = os.environ['MQTT_HOST']
 topic = "+/+/value/+/state"
 
 # You can generate a Token from the "Tokens Tab" in the UI
-token = os.environ['TOCKEN']
-org = os.environ['ORG']
-bucket = os.environ['jarvil-bucket']
+# token = os.environ['TOKEN']
+# org = os.environ['ORG']
+# bucket = os.environ['BUCKET']
+# print(f"token {token}, type {type(token)}")
+# print(f"token {org}, type {type(org)}")
+# print(f"token {bucket}, type {type(bucket)}")
+
+token = "V_g3T7i-QyHF3e_uDvBE05MRVKd-234xHwLDACXuw457UnhEBFOVP1Cr5IVb1EclrG6IRS5uBjMbOhMidnu8kA=="
+org = "jarvil"
+bucket = "jarvil-bucket"
 client = InfluxDBClient(url="http://influxdb:8086", token=token)
 write_api = client.write_api(write_options=SYNCHRONOUS)
+
+def log_climate(service_name,device_id,value_name,payload):
+    name = service_name + "_" + value_name
+    data=json.loads(payload)
+    print(f"data output {data}, type {type(data)}")
+    for key in data:
+        print(f"key output {key}, type {type(key)}")
+        print(f"data[key] output {data[key]}, type {type(data[key])}")
+        # log = f"{name},host={device_id} {key}={data[key]}"
+        # log = "mem,host=host1 used_percent=23.43234543"
+        # print("Write log: ", log)
+        # write_api.write(bucket, org, log)
+    return
+
+def log_time_slot_booking(service_name,device_id,value_name,payload):
+    return
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -30,6 +53,11 @@ def on_message(client, userdata, msg):
     value_name = msg.topic.split("/")[-2]
     device_id = msg.topic.split("/")[0]
     service_name = msg.topic.split("/")[1]
+
+    log = "mem,host=host1 used_percent=23.43234543"
+    print("1Write log: ", log)
+    write_api.write(bucket, org, log)
+
     switcher = {
         "climate-service": log_climate(service_name,device_id,value_name,decoded_payload),
         "time-slot-booking": log_time_slot_booking(service_name,device_id,value_name,decoded_payload)
@@ -48,14 +76,3 @@ client.connect(host)
 # Other loop*() functions are available that give a threaded interface and a
 # manual interface.
 client.loop_forever()
-
-def log_climate(service_name,device_id,value_name,payload):
-    name = service_name + "_" + value_name
-    data=json.loads(payload)
-    for key in data:
-        data = f"{name},host={device_id} {key}={data[key]}"
-        write_api.write(bucket, org, data)
-    return
-
-def log_time_slot_booking(service_name,device_id,value_name,payload):
-    return

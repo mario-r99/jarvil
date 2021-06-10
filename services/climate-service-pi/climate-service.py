@@ -27,8 +27,10 @@ it.start()
 # Sensor readout loop
 while True:
     brightness_state = board.analog[brightness_port].read()
-    temperature_state = "comming soon"
-    humidity_state = "comming soon"
+    # TODO
+    temperature_state = 0
+    # TODO
+    humidity_state = 0
 
     sensor_status = {"brightness":brightness_state,
                      "temperature":temperature_state,
