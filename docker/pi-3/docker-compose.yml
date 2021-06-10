@@ -10,4 +10,4 @@ services:
     environment:
       - MQTT_HOST=mqtt-broker
       - USB_PORT=/dev/ttyACM0
-      - BRIGHTNESS_PORT = 0
+      - BRIGHTNESS_PORT=0

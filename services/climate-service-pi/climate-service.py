@@ -20,13 +20,13 @@ client.loop_start()
 
 # Setup arduino connection
 board = pyfirmata.Arduino(usb_port)
-board.analog[brightness_port].mode = pyfirmata.INPUT  
+board.analog[int(brightness_port)].mode = pyfirmata.INPUT  
 it = pyfirmata.util.Iterator(board)  
 it.start()
 
 # Sensor readout loop
 while True:
-    brightness_state = board.analog[brightness_port].read()
+    brightness_state = board.analog[int(brightness_port)].read()
     # TODO
     temperature_state = 0
     # TODO
@@ -40,4 +40,5 @@ while True:
 
     print("Publishing sensor status:", sensor_status_out)
     client.publish(sensors_topic, sensor_status_out)
+
     time.sleep(readout_frequency)

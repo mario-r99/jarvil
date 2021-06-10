@@ -8,6 +8,7 @@ broker_host = "localhost"
 usb_port = 'COM6'
 brightness_port = 0
 sensors_topic = "pc-1/climate-service/value/sensors/state"
+
 readout_frequency = 1
 
 # Client initialization
@@ -42,4 +43,5 @@ while True:
 
     print("Publishing brightness:", sensor_status_out)
     client.publish(sensors_topic, sensor_status_out)
+
     time.sleep(readout_frequency)
