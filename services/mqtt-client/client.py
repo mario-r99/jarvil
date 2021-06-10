@@ -1,5 +1,6 @@
 import paho.mqtt.client as mqtt
 import os
+import json
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 
@@ -24,8 +25,8 @@ def on_connect(client, userdata, flags, rc):
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    decoded_payload =msg.payload.decode('UTF-8')
-    print("Recived value: "+decoded_payload+", on topic: "+msg.topic)
+    decoded_payload =str(msg.payload.decode('UTF-8'))
+    print("Received payload: " + decoded_payload + ", on topic: " + msg.topic)
     value_name = msg.topic.split("/")[-2]
     device_id = msg.topic.split("/")[0]
     service_name = msg.topic.split("/")[1]
@@ -49,8 +50,11 @@ client.connect(host)
 client.loop_forever()
 
 def log_climate(service_name,device_id,value_name,payload):
-    data = f"{service_name},host={device_id} {value_name}={payload}"
-    write_api.write(bucket, org, data)
+    name = service_name + "_" + value_name
+    data=json.loads(payload)
+    for key in data:
+        data = f"{name},host={device_id} {key}={data[key]}"
+        write_api.write(bucket, org, data)
     return
 
 def log_time_slot_booking(service_name,device_id,value_name,payload):
