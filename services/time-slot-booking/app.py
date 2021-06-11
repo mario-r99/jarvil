@@ -49,7 +49,7 @@ def home():
     week = get_current_week()
     if request.method == 'POST':
         if form.validate_on_submit():
-            new_input = process_form(form)
+            new_input = format_table(form)
             if validate_bookings(new_input, bookings):
                 set_bookings(new_input)
                 mqtt.publish('pi-2/time-slot-booking/value/booking/state', json.dumps(new_input))
@@ -135,7 +135,7 @@ def count_filter(array, match):
 
 
 # Convert table form into booking list
-def process_form(form):
+def format_table(form):
     # Put all form data into 2-dimensional array
     table = [
         [form.m1.data, form.m2.data, form.m3.data, form.m4.data],
