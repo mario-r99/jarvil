@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 import os
 import json
+from functools import partial
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 
@@ -27,6 +28,19 @@ def log_climate(service_name,device_id,value_name,payload):
     return
 
 def log_time_slot_booking(service_name,device_id,value_name,payload):
+    name = service_name + "_" + value_name
+    data=json.loads(payload)
+    for slot in data["bookings"]:
+        email = data["email"]
+        slotID = slot["week"]*10+slot["slot"]
+        print("BUG: slotID",slotID)
+        log = f"{name},host={device_id} {email}={slotID}"
+        print("Write log: ", log)
+        write_api.write(bucket, org, log)
+    return
+
+def invalid_service(service_name):
+    print("Error: Invalid service name - ",service_name)
     return
 
 # The callback for when the client receives a CONNACK response from the server.
@@ -44,12 +58,14 @@ def on_message(client, userdata, msg):
     device_id = msg.topic.split("/")[0]
     service_name = msg.topic.split("/")[1]
 
-    switcher = {
-        "climate-service": log_climate(service_name,device_id,value_name,decoded_payload),
-        "time-slot-booking": log_time_slot_booking(service_name,device_id,value_name,decoded_payload)
-    }
-# TODO: ad lambda method for switch
-    switcher.get(service_name)
+    print("1Bugfix: service_name:",service_name)
+
+    if service_name == "climate-service":
+        log_climate(service_name,device_id,value_name,decoded_payload)
+    elif service_name == "time-slot-booking":
+        log_time_slot_booking(service_name,device_id,value_name,decoded_payload)
+    else:
+        invalid_service(service_name)
 
 client = mqtt.Client()
 client.on_connect = on_connect
