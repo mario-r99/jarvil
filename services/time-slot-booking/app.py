@@ -52,7 +52,7 @@ def home():
             new_input = process_form(form)
             if validate_bookings(new_input, bookings):
                 set_bookings(new_input)
-                mqtt.publish('booking/new', json.dumps(new_input))
+                mqtt.publish('pi-2/time-slot-booking/value/booking/state', json.dumps(new_input))
                 flash(f'Reservation submitted for {new_input.get("firstname")} {new_input.get("lastname")}.', 'success')
                 return redirect(url_for('home'))
         else:
@@ -81,7 +81,6 @@ def get_bookings():
 
 # Additional form validation
 def validate_bookings(form_input, cache_bookings):
-
     # Check if at least one time slot is selected
     if not form_input.get("bookings"):
         flash('No slot selected. Please select at least one time slot.', 'danger')
@@ -116,7 +115,7 @@ def set_bookings(form_input):
             'firstname':form_input['firstname'],
             'lastname':form_input['lastname'],
             'email':form_input['email'],
-            'token':booking.get('token')
+            'token':secrets.token_urlsafe(16)
         }
         print(f'NEW ENTRY: {hash_name}:{form_input["email"]}', file=sys.stderr)
         pipe.hmset(f'{hash_name}:{form_input["email"]}', hash_dict)
@@ -154,8 +153,7 @@ def process_form(form):
             if slot == True:
                 bookings.append({
                     "week": week_index,
-                    "slot": slot_index,
-                    "token": secrets.token_urlsafe(16)
+                    "slot": slot_index
                 })
     return {
         "firstname": form.firstname.data,
