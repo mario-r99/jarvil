@@ -4,6 +4,7 @@ from flask_mqtt import Mqtt
 from flask_apscheduler import APScheduler
 from datetime import date, timedelta
 import redis
+import secrets
 import json
 import time
 import sys
@@ -51,7 +52,7 @@ def home():
             new_input = format_table(form)
             if validate_bookings(new_input, bookings):
                 set_bookings(new_input)
-                mqtt.publish('booking/new', json.dumps(new_input))
+                mqtt.publish('pi-2/time-slot-booking/0/value/booking/state', json.dumps(new_input))
                 flash(f'Reservation submitted for {new_input.get("firstname")} {new_input.get("lastname")}.', 'success')
                 return redirect(url_for('home'))
         else:
@@ -80,7 +81,6 @@ def get_bookings():
 
 # Additional form validation
 def validate_bookings(form_input, cache_bookings):
-
     # Check if at least one time slot is selected
     if not form_input.get("bookings"):
         flash('No slot selected. Please select at least one time slot.', 'danger')
@@ -114,7 +114,8 @@ def set_bookings(form_input):
         hash_dict = {
             'firstname':form_input['firstname'],
             'lastname':form_input['lastname'],
-            'email':form_input['email']
+            'email':form_input['email'],
+            'token':secrets.token_urlsafe(16)
         }
         print(f'NEW ENTRY: {hash_name}:{form_input["email"]}', file=sys.stderr)
         pipe.hmset(f'{hash_name}:{form_input["email"]}', hash_dict)
@@ -124,6 +125,7 @@ def set_bookings(form_input):
         raise exc
 
 
+# Count matching entries in array
 def count_filter(array, match):
     count = 0
     for element in array:
