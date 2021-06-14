@@ -52,7 +52,7 @@ def home():
             new_input = format_table(form)
             if validate_bookings(new_input, bookings):
                 set_bookings(new_input)
-                mqtt.publish('pi-2/time-slot-booking/value/booking/state', json.dumps(new_input))
+                mqtt.publish('pi-2/time-slot-booking/0/value/booking/state', json.dumps(new_input))
                 flash(f'Reservation submitted for {new_input.get("firstname")} {new_input.get("lastname")}.', 'success')
                 return redirect(url_for('home'))
         else:
