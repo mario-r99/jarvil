@@ -8,7 +8,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 # Global definitions
 host = os.environ['MQTT_HOST']
 # Subscribing only value state logs
-topic = "+/+/value/+/state"
+topic = "+/+/+/value/+/state"
 
 # Environmental variables
 token = os.environ['TOKEN']
@@ -23,19 +23,22 @@ def log_climate(service_name,device_id,value_name,payload):
     data=json.loads(payload)
     for key in data:
         log = f"{name},host={device_id} {key}={data[key]}"
-        print("Write log: ", log)
+        print(f"Write {service_name} log: {log}")
         write_api.write(bucket, org, log)
     return
 
 def log_time_slot_booking(service_name,device_id,value_name,payload):
-    name = service_name + "_" + value_name
     data=json.loads(payload)
+    name = service_name + "_" + value_name
+    email = data["email"]
+    first_second_name = data["firstname"]+"_"+data["lastname"]
+    log = f"{name},host={device_id} {first_second_name}=\"{email}\""
+    write_api.write(bucket, org, log)
+    print(f"Write {service_name} log: {log}")
     for slot in data["bookings"]:
-        email = data["email"]
         slotID = slot["week"]*10+slot["slot"]
-        print("BUG: slotID",slotID)
         log = f"{name},host={device_id} {email}={slotID}"
-        print("Write log: ", log)
+        print(f"Write {service_name} log: {log}")
         write_api.write(bucket, org, log)
     return
 
@@ -57,8 +60,6 @@ def on_message(client, userdata, msg):
     value_name = msg.topic.split("/")[-2]
     device_id = msg.topic.split("/")[0]
     service_name = msg.topic.split("/")[1]
-
-    print("1Bugfix: service_name:",service_name)
 
     if service_name == "climate-service":
         log_climate(service_name,device_id,value_name,decoded_payload)
