@@ -150,6 +150,8 @@ def send_mail(mail_data, week, tokens):
         "Your Booking Confirmation",
         recipients=[mail_data.get("email")])
     msg.html = render_template('mail.html', data=mail_data, week=week, slot=get_slots())
+    with app.open_resource("static/logo-cropped.png") as fp:
+        msg.attach("logo-cropped.png", "image/png", fp.read(), 'inline', headers=[['Content-ID','<logo>']])
     mail.send(msg)
 
 # Get all time slots as array
