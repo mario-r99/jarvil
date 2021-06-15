@@ -2,11 +2,11 @@ from flask import Flask, render_template, url_for, flash, redirect, request
 from forms import BookingForm
 from flask_mqtt import Mqtt
 from flask_apscheduler import APScheduler
+from flask_mail import Mail, Message
 from datetime import date, timedelta
 import redis
 import secrets
 import json
-import time
 import sys
 import os
 
@@ -22,12 +22,22 @@ app.config['MQTT_USERNAME'] = ''
 app.config['MQTT_PASSWORD'] = ''
 app.config['MQTT_KEEPALIVE'] = 60
 app.config['MQTT_TLS_ENABLED'] = False
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_DEFAULT_SENDER'] = "J.A.R.V.I.L.", os.environ['MAIL_USER']
+app.config['MAIL_USERNAME'] = os.environ['MAIL_USER']
+app.config['MAIL_PASSWORD'] = os.environ['MAIL_PASSWORD']
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 
 # Initialize redis database
 cache = redis.Redis(host='redis', port=6379, charset="utf-8", decode_responses=True)
 
 # Initialize mqtt client
 mqtt = Mqtt(app)
+
+# Initialize mail server
+mail = Mail(app)
 
 # Initialize background scheduler
 scheduler = APScheduler()
@@ -52,6 +62,7 @@ def home():
             new_input = format_table(form)
             if validate_bookings(new_input, bookings):
                 set_bookings(new_input)
+                send_mail(new_input)
                 mqtt.publish('pi-2/time-slot-booking/0/value/booking/state', json.dumps(new_input))
                 flash(f'Reservation submitted for {new_input.get("firstname")} {new_input.get("lastname")}.', 'success')
                 return redirect(url_for('home'))
@@ -71,9 +82,11 @@ def get_bookings():
         slots = []
         # Setting range to 4 slots, adapting to slot definition in home.html
         for slot_index in range(4):
-            occupied_slots = count_filter(entries, f'slot:{week_index}:{slot_index}')
+            occupied_slots = count_filter(
+                entries, f'slot:{week_index}:{slot_index}')
             free_slots = slot_amount - occupied_slots
-            slots.append(f'{free_slots} slots' if free_slots != 1 else '1 slot')
+            slots.append(f'{free_slots} slots' if free_slots !=
+                         1 else '1 slot')
         weeks.append(slots)
     # print(f'CURRENT WEEKS: {weeks}', file=sys.stderr)
     return weeks
@@ -99,7 +112,8 @@ def validate_bookings(form_input, cache_bookings):
     for form_booking in form_input.get("bookings"):
         search_string = f'slot:{form_booking.get("week")}:{form_booking.get("slot")}:{email}'
         if search_string in entries:
-            flash('You have already booked this or one of these time slots with this email address.', 'danger')
+            flash(
+                'You have already booked this or one of these time slots with this email address.', 'danger')
             return False
 
     return True
@@ -112,10 +126,10 @@ def set_bookings(form_input):
         hash_name = f'slot:{booking.get("week")}:{booking.get("slot")}'
         # used_slots = len(cache.scan(match=f'{hash_name}:*')[1])
         hash_dict = {
-            'firstname':form_input['firstname'],
-            'lastname':form_input['lastname'],
-            'email':form_input['email'],
-            'token':secrets.token_urlsafe(16)
+            'firstname': form_input['firstname'],
+            'lastname': form_input['lastname'],
+            'email': form_input['email'],
+            'token': secrets.token_urlsafe(16)
         }
         print(f'NEW ENTRY: {hash_name}:{form_input["email"]}', file=sys.stderr)
         pipe.hmset(f'{hash_name}:{form_input["email"]}', hash_dict)
@@ -123,6 +137,15 @@ def set_bookings(form_input):
         pipe.execute()
     except redis.exceptions.ConnectionError as exc:
         raise exc
+
+
+# Send QR code via email
+def send_mail(mail_data):
+    msg = Message(
+        "Your Booking Confirmation",
+        recipients=[mail_data.get("email")])
+    msg.html = render_template('mail.html')
+    mail.send(msg)
 
 
 # Count matching entries in array

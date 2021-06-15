@@ -11,6 +11,8 @@ services:
     environment:
       - FLASK_ENV=production
       - MQTT_HOST=mqtt-broker
+      - MAIL_USER=noreply.jarvil@gmail.com
+      - MAIL_PASSWORD=Sitter-Luckiness-Legwarmer1-Wobbling
 
   redis:
     image: redis:alpine
