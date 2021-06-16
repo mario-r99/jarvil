@@ -65,7 +65,7 @@ def home():
             if validate_bookings(new_input, bookings):
                 tokens = set_bookings(new_input)
                 send_mail(new_input, week, tokens)
-                mqtt.publish('pi-2/time-slot-booking/0/value/booking/state', json.dumps(new_input))
+                mqtt.publish('time-slot-booking/0/value/booking/state', json.dumps(new_input))
                 flash(f'Reservation submitted for {new_input.get("firstname")} {new_input.get("lastname")}. A confirmation mail was sent to {new_input.get("email")}.', 'success')
                 return redirect(url_for('home'))
         else:

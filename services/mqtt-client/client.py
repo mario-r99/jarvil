@@ -8,7 +8,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 # Global definitions
 host = os.environ['MQTT_HOST']
 # Subscribing only value state logs
-topic = "+/+/+/value/+/state"
+topic = "+/+/value/+/state"
 
 # Environmental variables
 token = os.environ['TOKEN']
