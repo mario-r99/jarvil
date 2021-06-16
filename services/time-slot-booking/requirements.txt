@@ -5,3 +5,4 @@ flask-mqtt
 flask-apscheduler
 flask-mail
 redis
+qrcode[pil]
