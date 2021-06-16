@@ -23,6 +23,14 @@ services:
       - MAIL_USER=noreply.jarvil@gmail.com
       - MAIL_PASSWORD=Sitter-Luckiness-Legwarmer1-Wobbling
 
+  time-slot-validation:
+    build: ../../services/time-slot-validation
+    container_name: time-slot-validation
+    volumes:
+      - ../../services/time-slot-validation:/app
+    environment:
+      - MQTT_HOST=mqtt-broker
+
   redis:
     image: redis:alpine
     container_name: redis
