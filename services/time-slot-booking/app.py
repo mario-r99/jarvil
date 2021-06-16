@@ -2,13 +2,15 @@ from flask import Flask, render_template, url_for, flash, redirect, request
 from forms import BookingForm
 from flask_mqtt import Mqtt
 from flask_apscheduler import APScheduler
+from flask_mail import Mail, Message
 from datetime import date, timedelta
 import redis
+import qrcode
 import secrets
 import json
-import time
 import sys
 import os
+import io
 
 # Initialize room
 slot_amount = 10
@@ -22,12 +24,22 @@ app.config['MQTT_USERNAME'] = ''
 app.config['MQTT_PASSWORD'] = ''
 app.config['MQTT_KEEPALIVE'] = 60
 app.config['MQTT_TLS_ENABLED'] = False
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_DEFAULT_SENDER'] = "J.A.R.V.I.L.", os.environ['MAIL_USER']
+app.config['MAIL_USERNAME'] = os.environ['MAIL_USER']
+app.config['MAIL_PASSWORD'] = os.environ['MAIL_PASSWORD']
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 
 # Initialize redis database
 cache = redis.Redis(host='redis', port=6379, charset="utf-8", decode_responses=True)
 
 # Initialize mqtt client
 mqtt = Mqtt(app)
+
+# Initialize mail server
+mail = Mail(app)
 
 # Initialize background scheduler
 scheduler = APScheduler()
@@ -51,9 +63,10 @@ def home():
         if form.validate_on_submit():
             new_input = format_table(form)
             if validate_bookings(new_input, bookings):
-                set_bookings(new_input)
+                tokens = set_bookings(new_input)
+                send_mail(new_input, week, tokens)
                 mqtt.publish('pi-2/time-slot-booking/0/value/booking/state', json.dumps(new_input))
-                flash(f'Reservation submitted for {new_input.get("firstname")} {new_input.get("lastname")}.', 'success')
+                flash(f'Reservation submitted for {new_input.get("firstname")} {new_input.get("lastname")}. A confirmation mail was sent to {new_input.get("email")}.', 'success')
                 return redirect(url_for('home'))
         else:
             flash('Invalid form input. Look below for more information.', 'danger')
@@ -99,7 +112,8 @@ def validate_bookings(form_input, cache_bookings):
     for form_booking in form_input.get("bookings"):
         search_string = f'slot:{form_booking.get("week")}:{form_booking.get("slot")}:{email}'
         if search_string in entries:
-            flash('You have already booked this or one of these time slots with this email address.', 'danger')
+            flash(
+                'You have already booked this or one of these time slots with this email address.', 'danger')
             return False
 
     return True
@@ -108,22 +122,57 @@ def validate_bookings(form_input, cache_bookings):
 # Save new input data in cache with the format slot:{week-nr(0-6)}:{slot-nr(0-3)}:occupant-id(email)
 def set_bookings(form_input):
     pipe = cache.pipeline()
+    tokens = []
     for booking in form_input.get("bookings"):
         hash_name = f'slot:{booking.get("week")}:{booking.get("slot")}'
-        # used_slots = len(cache.scan(match=f'{hash_name}:*')[1])
+        token = secrets.token_urlsafe(16)
         hash_dict = {
-            'firstname':form_input['firstname'],
-            'lastname':form_input['lastname'],
-            'email':form_input['email'],
-            'token':secrets.token_urlsafe(16)
+            'firstname': form_input['firstname'],
+            'lastname': form_input['lastname'],
+            'email': form_input['email'],
+            'token': token
         }
+        tokens.append(token)
         print(f'NEW ENTRY: {hash_name}:{form_input["email"]}', file=sys.stderr)
         pipe.hmset(f'{hash_name}:{form_input["email"]}', hash_dict)
     try:
         pipe.execute()
+        return tokens
     except redis.exceptions.ConnectionError as exc:
         raise exc
 
+
+# Send email
+def send_mail(mail_data, week, tokens):
+    print("LENGTH:", file=sys.stderr)
+    print(len(mail_data.get("bookings")), file=sys.stderr)
+    msg = Message(
+        "Your Booking Confirmation",
+        recipients=[mail_data.get("email")])
+    msg.html = render_template('mail.html', data=mail_data, week=week, slot=get_slots())
+    with app.open_resource("static/logo-cropped.png") as fp:
+        msg.attach("logo-cropped.png", "image/png", fp.read(), 'inline', headers=[['Content-ID','<logo>']])
+    for number, token in enumerate(tokens, start=1):
+        msg.attach(f"qr-{number}.jpg", "image/jpg", get_qr_code(token), 'inline', headers=[['Content-ID',f'<qr-{number}>']])
+    mail.send(msg)
+
+# Generate qr code from token
+def get_qr_code(token):
+    buffer = io.BytesIO()
+    image = qrcode.make(token)
+    print("QRCODE:", file=sys.stderr)
+    print(image, file=sys.stderr)
+    image.save(buffer, format='JPEG')
+    return buffer.getvalue()
+
+# Get all time slots as array
+def get_slots():
+    return [
+        "00:00 - 06:00",
+        "06:00 - 12:00",
+        "12:00 - 18:00",
+        "18:00 - 24:00",
+    ]
 
 # Count matching entries in array
 def count_filter(array, match):
@@ -173,8 +222,10 @@ def get_current_week():
     friday = monday + timedelta(days=4)
     saturday = monday + timedelta(days=5)
     sunday = monday + timedelta(days=6)
+    # 0: full week, 1-7: short date, 8-14: long date
     return [
         f'{monday.strftime("%d.%m.%Y")} - {sunday.strftime("%d.%m.%Y")}',
+
         monday.strftime("%b %d"),
         tuesday.strftime("%b %d"),
         wednesday.strftime("%b %d"),
@@ -182,4 +233,12 @@ def get_current_week():
         friday.strftime("%b %d"),
         saturday.strftime("%b %d"),
         sunday.strftime("%b %d"),
+
+        monday.strftime("%d.%m.%Y"),
+        tuesday.strftime("%d.%m.%Y"),
+        wednesday.strftime("%d.%m.%Y"),
+        thursday.strftime("%d.%m.%Y"),
+        friday.strftime("%d.%m.%Y"),
+        saturday.strftime("%d.%m.%Y"),
+        sunday.strftime("%d.%m.%Y"),
     ]
