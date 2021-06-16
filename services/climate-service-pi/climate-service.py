@@ -8,7 +8,7 @@ import json
 broker_host = os.environ['MQTT_HOST']
 usb_port = os.environ['USB_PORT']
 brightness_port = os.environ['BRIGHTNESS_PORT']
-sensors_topic = "pi-3/climate-service/0/value/sensors/state"
+sensors_topic = "climate-service/0/value/sensors/state"
 readout_frequency = 1
 
 # Client initialization
