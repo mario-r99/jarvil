@@ -5,10 +5,12 @@ from flask_apscheduler import APScheduler
 from flask_mail import Mail, Message
 from datetime import date, timedelta
 import redis
+import qrcode
 import secrets
 import json
 import sys
 import os
+import io
 
 # Initialize room
 slot_amount = 10
@@ -150,14 +152,18 @@ def send_mail(mail_data, week, tokens):
     msg.html = render_template('mail.html', data=mail_data, week=week, slot=get_slots())
     with app.open_resource("static/logo-cropped.png") as fp:
         msg.attach("logo-cropped.png", "image/png", fp.read(), 'inline', headers=[['Content-ID','<logo>']])
-    # for token in tokens:
-    #     get_qr_code(token)
+    for number, token in enumerate(tokens, start=1):
+        msg.attach(f"qr-{number}.jpg", "image/jpg", get_qr_code(token), 'inline', headers=[['Content-ID',f'<qr-{number}>']])
     mail.send(msg)
 
 # Generate qr code from token
 def get_qr_code(token):
+    buffer = io.BytesIO()
+    image = qrcode.make(token)
     print("QRCODE:", file=sys.stderr)
-    print(qrcode.make(token), file=sys.stderr)
+    print(image, file=sys.stderr)
+    image.save(buffer, format='JPEG')
+    return buffer.getvalue()
 
 # Get all time slots as array
 def get_slots():
