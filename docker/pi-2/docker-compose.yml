@@ -1,19 +1,12 @@
 # time slot booking with redis cache
 version: "2.1"
 services:
-  
-  time-slot-booking:
-    # root path due to github actions file copy
-    build: ./services/time-slot-booking
-    container_name: time-slot-booking
-    ports:
-      - "5000:5000"
-    environment:
-      - FLASK_ENV=production
-      - MQTT_HOST=mqtt-broker
-      - MAIL_USER=noreply.jarvil@gmail.com
-      - MAIL_PASSWORD=Sitter-Luckiness-Legwarmer1-Wobbling
 
-  redis:
-    image: redis:alpine
-    container_name: redis
+    mqtt-broker:
+      # root path due to github actions file copy
+      build: ./services/mqtt-broker
+      container_name: mqtt-broker
+      restart: always
+      ports:
+        - 1883:1883
+        - 9001:9001
