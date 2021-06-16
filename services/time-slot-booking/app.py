@@ -82,11 +82,9 @@ def get_bookings():
         slots = []
         # Setting range to 4 slots, adapting to slot definition in home.html
         for slot_index in range(4):
-            occupied_slots = count_filter(
-                entries, f'slot:{week_index}:{slot_index}')
+            occupied_slots = count_filter(entries, f'slot:{week_index}:{slot_index}')
             free_slots = slot_amount - occupied_slots
-            slots.append(f'{free_slots} slots' if free_slots !=
-                         1 else '1 slot')
+            slots.append(f'{free_slots} slots' if free_slots != 1 else '1 slot')
         weeks.append(slots)
     # print(f'CURRENT WEEKS: {weeks}', file=sys.stderr)
     return weeks
@@ -142,9 +140,9 @@ def set_bookings(form_input):
         raise exc
 
 
-# Send QR code via email
+# Send email
 def send_mail(mail_data, week, tokens):
-    print("LENGTH", file=sys.stderr)
+    print("LENGTH:", file=sys.stderr)
     print(len(mail_data.get("bookings")), file=sys.stderr)
     msg = Message(
         "Your Booking Confirmation",
@@ -152,7 +150,14 @@ def send_mail(mail_data, week, tokens):
     msg.html = render_template('mail.html', data=mail_data, week=week, slot=get_slots())
     with app.open_resource("static/logo-cropped.png") as fp:
         msg.attach("logo-cropped.png", "image/png", fp.read(), 'inline', headers=[['Content-ID','<logo>']])
+    # for token in tokens:
+    #     get_qr_code(token)
     mail.send(msg)
+
+# Generate qr code from token
+def get_qr_code(token):
+    print("QRCODE:", file=sys.stderr)
+    print(qrcode.make(token), file=sys.stderr)
 
 # Get all time slots as array
 def get_slots():
