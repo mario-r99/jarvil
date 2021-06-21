@@ -19,25 +19,25 @@ client = InfluxDBClient(url="http://influxdb:8086", token=token)
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
 def log_climate(service_name,device_id,value_name,payload):
-    name = service_name + "_" + value_name
+    measurement_name = service_name + "_" + value_name
     data=json.loads(payload)
     for key in data:
-        log = f"{name},host={device_id} {key}={data[key]}"
+        log = f"{measurement_name},host={device_id} {key}={data[key]}"
         print(f"Write {service_name} log: {log}")
         write_api.write(bucket, org, log)
     return
 
-def log_time_slot_booking(service_name,device_id,value_name,payload):
-    data=json.loads(payload)
-    name = service_name + "_" + value_name
+def log_time_slot_booking(service_name, device_id, value_name, payload):
+    data = json.loads(payload)
+    measurement_name = f"{service_name}_{value_name}"
     email = data["email"]
-    first_second_name = data["firstname"]+"_"+data["lastname"]
-    log = f"{name},host={device_id} {first_second_name}=\"{email}\""
+    full_name = data["firstname"] + "_" + data["lastname"]
+    log = f"{measurement_name},host={device_id} {full_name}=\"{email}\""
     write_api.write(bucket, org, log)
     print(f"Write {service_name} log: {log}")
     for slot in data["bookings"]:
-        slotID = slot["week"]*10+slot["slot"]
-        log = f"{name},host={device_id} {email}={slotID}"
+        slotID = slot["week"] * 10 + slot["slot"]
+        log = f"{measurement_name},host={device_id} {email}={slotID}"
         print(f"Write {service_name} log: {log}")
         write_api.write(bucket, org, log)
     return
@@ -58,9 +58,9 @@ def on_message(client, userdata, msg):
     decoded_payload =str(msg.payload.decode('UTF-8'))
     print("Received payload: " + decoded_payload + ", on topic: " + msg.topic)
     value_name = msg.topic.split("/")[-2]
-    device_id = msg.topic.split("/")[0]
-    service_name = msg.topic.split("/")[1]
-
+    device_id = msg.topic.split("/")[1]
+    service_name = msg.topic.split("/")[0]
+    
     if service_name == "climate-service":
         log_climate(service_name,device_id,value_name,decoded_payload)
     elif service_name == "time-slot-booking":
