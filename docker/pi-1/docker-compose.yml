@@ -14,6 +14,8 @@ services:
   mqtt-client:
     # root path due to github actions file copy
     build: ./services/mqtt-client
+    depends_on:
+      - "mqtt-broker"
     links:
       - "influxdb"
     environment:
