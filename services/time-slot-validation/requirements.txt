@@ -1,2 +1,6 @@
 paho-mqtt
 redis
+pillow
+pyzbar[scripts]
+opencv-python
+pytz
