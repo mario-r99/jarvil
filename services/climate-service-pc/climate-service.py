@@ -3,7 +3,8 @@ import pyfirmata
 import time
 import json
 import datetime
-import array
+# import array
+import numpy as np
 
 # Global definitions
 broker_host = "localhost"
@@ -28,6 +29,9 @@ client = mqtt.Client()
 client.connect(broker_host)
 client.loop_start()
 
+def current_micros_time():
+    return round(time.time() * 1000000)
+
 # Setup arduino connection
 board = pyfirmata.Arduino(usb_port)
 board.analog[brightness_port].mode = pyfirmata.INPUT
@@ -36,20 +40,25 @@ board.analog[air_port].mode = pyfirmata.INPUT
 board.digital[light_port].mode = pyfirmata.OUTPUT
 it = pyfirmata.util.Iterator(board)
 it.start()
-starting_time_mcs = datetime.now().microseconds
-
+# starting_time_mcs = datetime.now().microseconds
+starting_time_mcs = current_micros_time()
 
 def delay_timer(delay_value):
-    delay_time = datetime.now().microseconds
-    while (datetime.now().microseconds - delay_time) < delay_value:
+    delay_time = current_micros_time()
+    while (current_micros_time() - delay_time) < delay_value:
         pass
 
 def read_DHT11(port):
+    temp = 0
+    hum = 0
+    dht_error = False
+
     data_time = 0
-    result = []
-    dht_data = array("B")
+    result = np.ndarray([])
+    # dht_data = array("B")
+    dht_data = np.ndarray([])
     data_array = 0
-    data_counter = 0
+    # data_counter = 0
     block_dht = False
 
     # Trigger Sensor 
@@ -57,21 +66,25 @@ def read_DHT11(port):
     board.digital[port].write(1)
     delay_timer(250000) #Wait 250millisec
     board.digital[port].write(0)
-    delay_timer(30000) #Wait 30millisec
+    delay_timer(20000) #Wait 30millisec
     board.digital[port].write(1)
-    delay_timer(50) #Wait 50microsec
+    delay_timer(40) #Wait 50microsec
     board.digital[port].mode = pyfirmata.INPUT
+    delay_timer(50)
+    while True:
+        print("bug ",board.digital[port].read())
+
 
     while True:
         if board.digital[port].read() == 0 and block_dht == False:
             block_dht = True
-            result[data_array] = datetime.now().microseconds - starting_time_mcs - data_time
+            result[data_array] = current_micros_time() - starting_time_mcs - data_time
             data_array+=1
-            data_time = datetime.now().microseconds - starting_time_mcs
+            data_time = current_micros_time() - starting_time_mcs
         # If DHT pin is low, go to next Dataset
         if board.digital[port].read() == 1:
             block_dht = False
-        if (datetime.now().microseconds - starting_time_mcs - data_time) < 150: #if DTH Sensor high for more than 150 usec, leave loop
+        if ((current_micros_time() - starting_time_mcs - data_time) < 150): #if DTH Sensor high for more than 150 usec, leave loop
             break
 
     # Asign 1 or 0 to Result variable. If more than 80uS Data as "1"
@@ -82,11 +95,15 @@ def read_DHT11(port):
         else:
             result[i]=1
     
-    # for j in range(0,5):
-    #     for i in range(0,8):
+    dht_data = np.packbits(result[2:42].reshape((5,8)))
 
-    temp = 0
-    hum = 0
+    if (dht_data[4]==np.sum(dht_data[:4])):
+        hum = dht_data[0]
+        temp = float(f"{dht_data[2]}.{dht_data[3]}")
+        dht_error = False
+    else:
+        dht_error = True
+
     return temp, hum
 
 # Sensor readout loop
@@ -97,7 +114,7 @@ while True:
     # temperature_state = board.analog[temperature_port].read()
     temperature_state,humidity_state = read_DHT11(dht11_port)
     # TODO
-    humidity_state = 0.0
+    # humidity_state = 0.0
 
     #Read actuator status
     # light_state = board.digital[light_port].read()
