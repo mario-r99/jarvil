@@ -13,6 +13,9 @@ services:
   time-slot-booking:
     build: ../../services/time-slot-booking
     container_name: time-slot-booking
+    depends_on:
+      - "mqtt-broker"
+      - "redis"
     ports:
       - "5000:5000"
     volumes:
@@ -22,6 +25,17 @@ services:
       - MQTT_HOST=mqtt-broker
       - MAIL_USER=noreply.jarvil@gmail.com
       - MAIL_PASSWORD=Sitter-Luckiness-Legwarmer1-Wobbling
+
+  time-slot-validation:
+    build: ../../services/time-slot-validation
+    container_name: time-slot-validation
+    depends_on:
+      - "mqtt-broker"
+      - "redis"
+    volumes:
+      - ../../services/time-slot-validation:/app
+    environment:
+      - MQTT_HOST=mqtt-broker
 
   redis:
     image: redis:alpine
