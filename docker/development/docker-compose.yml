@@ -32,6 +32,8 @@ services:
     depends_on:
       - mqtt-broker
       - redis
+    devices:
+      - /dev/video0
     volumes:
       - ../../services/time-slot-validation:/app
     environment:
