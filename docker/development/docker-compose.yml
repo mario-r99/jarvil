@@ -14,8 +14,8 @@ services:
     build: ../../services/time-slot-booking
     container_name: time-slot-booking
     depends_on:
-      - "mqtt-broker"
-      - "redis"
+      - mqtt-broker
+      - redis
     ports:
       - "5000:5000"
     volumes:
@@ -30,8 +30,8 @@ services:
     build: ../../services/time-slot-validation
     container_name: time-slot-validation
     depends_on:
-      - "mqtt-broker"
-      - "redis"
+      - mqtt-broker
+      - redis
     volumes:
       - ../../services/time-slot-validation:/app
     environment:
