@@ -8,11 +8,22 @@ services:
     container_name: time-slot-booking
     ports:
       - "5000:5000"
+    depends_on:
+      - redis
     environment:
       - FLASK_ENV=production
       - MQTT_HOST=mqtt-broker
       - MAIL_USER=noreply.jarvil@gmail.com
       - MAIL_PASSWORD=Sitter-Luckiness-Legwarmer1-Wobbling
+
+  time-slot-validation:
+    # root path due to github actions file copy
+    build: ./services/time-slot-validation
+    container_name: time-slot-validation
+    depends_on:
+      - redis
+    environment:
+      - MQTT_HOST=mqtt-broker
 
   redis:
     image: redis:alpine
@@ -21,8 +32,6 @@ services:
   mqtt-client:
     # root path due to github actions file copy
     build: ./services/mqtt-client
-    depends_on:
-      - "mqtt-broker"
     links:
       - "influxdb"
     environment:
