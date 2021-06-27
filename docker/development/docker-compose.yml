@@ -32,8 +32,6 @@ services:
     depends_on:
       - mqtt-broker
       - redis
-    devices:
-      - /dev/video0
     volumes:
       - ../../services/time-slot-validation:/app
     environment:
@@ -73,8 +71,8 @@ services:
       - 3000:3000
     volumes:
       - ../../services/data/grafana_data:/var/lib/grafana
-    depends_on:
-      - influxdb
+    environment:
+      - GF_INSTALL_PLUGINS=aidanmountford-html-panel
 
   influxdb:
     image: influxdb:latest

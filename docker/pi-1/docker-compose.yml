@@ -49,8 +49,8 @@ services:
     restart: always
     ports:
       - 3000:3000
-    depends_on:
-      - influxdb
+    environment:
+      - GF_INSTALL_PLUGINS=aidanmountford-html-panel
 
   influxdb:
     # root path due to github actions file copy
