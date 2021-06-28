@@ -1,4 +1,4 @@
-# mqtt broker with influxdb and grafana
+# time slot services and databases
 version: "2.1"
 services:
 
@@ -42,7 +42,7 @@ services:
       - BUCKET=jarvil-bucket
       - TOKEN=V_g3T7i-QyHF3e_uDvBE05MRVKd-234xHwLDACXuw457UnhEBFOVP1Cr5IVb1EclrG6IRS5uBjMbOhMidnu8kA==
   
-  grafana:
+  control-dashboard:
     # root path due to github actions file copy
     build: ./services/control-dashboard
     container_name: control-dashboard

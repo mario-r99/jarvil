@@ -62,7 +62,7 @@ services:
       - BUCKET=jarvil-bucket
       - TOKEN=V_g3T7i-QyHF3e_uDvBE05MRVKd-234xHwLDACXuw457UnhEBFOVP1Cr5IVb1EclrG6IRS5uBjMbOhMidnu8kA==
 
-  grafana:
+  control-dashboard:
     build: ../../services/control-dashboard
     container_name: control-dashboard
     restart: always
@@ -72,6 +72,7 @@ services:
       - ../../services/control-dashboard:/etc/grafana/provisioning
       - grafana_data:/var/lib/grafana
     environment:
+      - MQTT_HOST=mqtt-broker
       - GF_SECURITY_ADMIN_PASSWORD=password
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
 
