@@ -72,7 +72,6 @@ services:
       - ../../services/control-dashboard:/etc/grafana/provisioning
       - grafana_data:/var/lib/grafana
     environment:
-      - MQTT_HOST=mqtt-broker
       - GF_SECURITY_ADMIN_PASSWORD=password
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
 
