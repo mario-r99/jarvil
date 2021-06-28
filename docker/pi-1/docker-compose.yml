@@ -44,16 +44,16 @@ services:
   
   grafana:
     # root path due to github actions file copy
-    image: grafana/grafana
-    container_name: grafana
+    build: ./services/control-dashboard
+    container_name: control-dashboard
     restart: always
     ports:
       - 3000:3000
     environment:
+      - GF_SECURITY_ADMIN_PASSWORD=password
       - GF_INSTALL_PLUGINS=aidanmountford-html-panel
 
   influxdb:
-    # root path due to github actions file copy
     image: influxdb:latest
     container_name: influxdb
     restart: always

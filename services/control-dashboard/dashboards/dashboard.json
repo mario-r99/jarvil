@@ -1,0 +1,69 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "id": 2,
+    "links": [],
+    "panels": [
+      {
+        "aliasColors": {},
+        "cacheTimeout": null,
+        "css_data": "",
+        "datasource": null,
+        "description": "This is an HTML test",
+        "doInit": {},
+        "format": "short",
+        "gridPos": {
+          "h": 9,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "handleMetric": {},
+        "html_data": "<button type=\"button\" onclick=\"alert('Hello world!')\">Click Me!</button>",
+        "id": 2,
+        "interval": null,
+        "js_code": "",
+        "js_init_code": "",
+        "links": [],
+        "maxDataPoints": 3,
+        "nullPointMode": "connected",
+        "targets": [
+          {
+            "queryType": "randomWalk",
+            "refId": "A"
+          }
+        ],
+        "title": "HTML Test",
+        "type": "aidanmountford-html-panel"
+      }
+    ],
+    "schemaVersion": 30,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "J.A.R.V.I.L.",
+    "uid": "CCy4fFz7z",
+    "version": 1
+  }
