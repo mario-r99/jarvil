@@ -44,7 +44,6 @@ def log_time_slot_booking(service_name, device_id, value_name, payload):
     return
 
 def log_setpoint(service_name, device_id, value_name, payload):
-    print("setpoint logger")
     measurement_name = service_name + "_" + value_name
     data=json.loads(payload)
     for key in data:
