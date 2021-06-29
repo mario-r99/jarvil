@@ -438,24 +438,16 @@
 
 
     $(".minusT").mousedown(function () {
+        console.log("Temperature minus")
         if (gradiT > min) {
             mqttMessage(gradiT - 1, temperatureTopic)
         }
     });
-    $(".minusH").mousedown(function () {
-        if (gradiH > min) {
-            mqttMessage(gradiH - 1, humidityTopic)
-        }
-    });
 
     $(".plusT").mousedown(function () {
+        console.log("Temperature plus")
         if (gradiT < max) {
             mqttMessage(gradiT + 1, temperatureTopic)
-        }
-    });
-    $(".plusH").mousedown(function () {
-        if (gradiH < max) {
-            mqttMessage(gradiH + 1, humidityTopic)
         }
     });
 

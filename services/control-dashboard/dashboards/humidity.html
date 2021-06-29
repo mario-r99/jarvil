@@ -1,3 +1,19 @@
+<script>
+    $(".minusH").mousedown(function () {
+        console.log("Humidity minus")
+        if (gradiH > min) {
+            mqttMessage(gradiH - 1, humidityTopic)
+        }
+    });
+
+    $(".plusH").mousedown(function () {
+        console.log("Humidity plus")
+        if (gradiH < max) {
+            mqttMessage(gradiH + 1, humidityTopic)
+        }
+    });
+
+</script>
 <div class="thermostat">
     <div class="bar">
         <div class="inner_bar"></div>
