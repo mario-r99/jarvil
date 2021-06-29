@@ -9,6 +9,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 host = os.environ['MQTT_HOST']
 # Subscribing only value state logs
 topic = "+/+/value/+/state"
+topic = "+/+/value/+/setpoint"
 
 # Environmental variables
 token = os.environ['TOKEN']
@@ -42,6 +43,16 @@ def log_time_slot_booking(service_name, device_id, value_name, payload):
         write_api.write(bucket, org, log)
     return
 
+def log_setpoint(service_name, device_id, value_name, payload):
+    print("setpoint logger")
+    measurement_name = service_name + "_" + value_name
+    data=json.loads(payload)
+    for key in data:
+        log = f"{measurement_name},host={device_id} {key}={data[key]}"
+        print(f"Write {service_name} log: {log}")
+        write_api.write(bucket, org, log)
+    return
+
 def invalid_service(service_name):
     print("Error: Invalid service name - ",service_name)
     return
@@ -65,6 +76,8 @@ def on_message(client, userdata, msg):
         log_climate(service_name,device_id,value_name,decoded_payload)
     elif service_name == "time-slot-booking":
         log_time_slot_booking(service_name,device_id,value_name,decoded_payload)
+    elif service_name == "control-dashboard":
+        log_setpoint(service_name, device_id, value_name, decoded_payload)
     else:
         invalid_service(service_name)
 
