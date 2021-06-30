@@ -7,8 +7,9 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 
 # Global definitions
 host = os.environ['MQTT_HOST']
-# Subscribing only value state logs
-topic = "+/+/value/+/state"
+# Subscribing only value state and setpoint logs
+topic_state = "+/+/value/+/state"
+topic_setpoint = "+/+/value/+/setpoint"
 
 # Environmental variables
 token = os.environ['TOKEN']
@@ -42,6 +43,15 @@ def log_time_slot_booking(service_name, device_id, value_name, payload):
         write_api.write(bucket, org, log)
     return
 
+def log_setpoint(service_name, device_id, value_name, payload):
+    measurement_name = service_name + "_" + value_name
+    data=json.loads(payload)
+    for key in data:
+        log = f"{measurement_name},host={device_id} {key}={data[key]}"
+        print(f"Write {service_name} log: {log}")
+        write_api.write(bucket, org, log)
+    return
+
 def invalid_service(service_name):
     print("Error: Invalid service name - ",service_name)
     return
@@ -51,7 +61,8 @@ def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    client.subscribe(topic)
+    client.subscribe(topic_state)
+    client.subscribe(topic_setpoint)
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
@@ -65,6 +76,8 @@ def on_message(client, userdata, msg):
         log_climate(service_name,device_id,value_name,decoded_payload)
     elif service_name == "time-slot-booking":
         log_time_slot_booking(service_name,device_id,value_name,decoded_payload)
+    elif service_name == "control-dashboard":
+        log_setpoint(service_name, device_id, value_name, decoded_payload)
     else:
         invalid_service(service_name)
 
