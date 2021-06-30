@@ -7,7 +7,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 
 # Global definitions
 host = os.environ['MQTT_HOST']
-# Subscribing only value state logs
+# Subscribing only value state and setpoint logs
 topic = "+/+/value/+/state"
 topic = "+/+/value/+/setpoint"
 
