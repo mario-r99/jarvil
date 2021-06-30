@@ -8,8 +8,8 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 # Global definitions
 host = os.environ['MQTT_HOST']
 # Subscribing only value state and setpoint logs
-topic = "+/+/value/+/state"
-topic = "+/+/value/+/setpoint"
+topic_state = "+/+/value/+/state"
+topic_setpoint = "+/+/value/+/setpoint"
 
 # Environmental variables
 token = os.environ['TOKEN']
@@ -61,7 +61,8 @@ def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    client.subscribe(topic)
+    client.subscribe(topic_state)
+    client.subscribe(topic_setpoint)
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
