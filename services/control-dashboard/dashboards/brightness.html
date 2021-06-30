@@ -1,0 +1,43 @@
+<script>
+    $(".minusB").mousedown(function () {
+        console.log("Brightness minus")
+        if (gradiB > min) {
+            console.log("Pushing new calculated value: " + (gradiB / 34 - 0.01).toFixed(2))
+            mqttMessage(((gradiB - 1) / 34).toFixed(2), brightnessTopic)
+        }
+    });
+
+    $(".plusB").mousedown(function () {
+        console.log("Brightness plus")
+        if (gradiB < max) {
+            console.log("Pushing new calculated value: " + (gradiB / 34 + 0.01).toFixed(2))
+            mqttMessage(((gradiB + 1) / 34).toFixed(2), brightnessTopic)
+        }
+    });
+
+</script>
+<div class="thermostat">
+    <div class="bar">
+        <div class="inner_bar"></div>
+        <div class='hold left'>
+            <div class='fill fillB fill1B'></div>
+        </div>
+        <div class='hold right'>
+            <div class='fill fillB fill2B'></div>
+        </div>
+        <span>Brightness</span>
+    </div>
+    <div class="shadow shadowB">
+        <div class="shadow-cubeB"></div>
+    </div>
+    <div class="number numberB">
+        <span class="ext extB">...</span>
+    </div>
+    <div class="center">
+        <span class="arrow minus minusB"><i class="material-icons">keyboard_arrow_left</i></span>
+        <span class="arrow plus plusB"><i class="material-icons">keyboard_arrow_right</i></span>
+        <div class="small">
+            <span class="heat heatB">...</span>
+        </div>
+    </div>
+</div>

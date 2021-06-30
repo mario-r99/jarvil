@@ -2,14 +2,16 @@
     $(".minusH").mousedown(function () {
         console.log("Humidity minus")
         if (gradiH > min) {
-            mqttMessage(gradiH - 1, humidityTopic)
+            console.log("Pushing new calculated value: " + (gradiH / 34 - 0.01).toFixed(2))
+            mqttMessage(((gradiH - 1) / 34).toFixed(2), humidityTopic)
         }
     });
 
     $(".plusH").mousedown(function () {
         console.log("Humidity plus")
         if (gradiH < max) {
-            mqttMessage(gradiH + 1, humidityTopic)
+            console.log("Pushing new calculated value: " + (gradiH / 34 + 0.01).toFixed(2))
+            mqttMessage(((gradiH + 1) / 34).toFixed(2), humidityTopic)
         }
     });
 
@@ -18,10 +20,10 @@
     <div class="bar">
         <div class="inner_bar"></div>
         <div class='hold left'>
-            <div class='fill fillT fill1H'></div>
+            <div class='fill fillH fill1H'></div>
         </div>
         <div class='hold right'>
-            <div class='fill fillT fill2H'></div>
+            <div class='fill fillH fill2H'></div>
         </div>
         <span>Humidify</span>
     </div>
