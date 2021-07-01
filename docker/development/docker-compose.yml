@@ -32,8 +32,6 @@ services:
     depends_on:
       - mqtt-broker
       - redis
-    devices:
-      - /dev/video0
     volumes:
       - ../../services/time-slot-validation:/app
     environment:
@@ -63,18 +61,19 @@ services:
       - ORG=jarvil
       - BUCKET=jarvil-bucket
       - TOKEN=V_g3T7i-QyHF3e_uDvBE05MRVKd-234xHwLDACXuw457UnhEBFOVP1Cr5IVb1EclrG6IRS5uBjMbOhMidnu8kA==
-    
 
-  grafana:
-    image: grafana/grafana
-    container_name: grafana
+  control-dashboard:
+    build: ../../services/control-dashboard
+    container_name: control-dashboard
     restart: always
     ports:
       - 3000:3000
     volumes:
-      - ../../services/data/grafana_data:/var/lib/grafana
-    depends_on:
-      - influxdb
+      - ../../services/control-dashboard:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=password
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true
 
   influxdb:
     image: influxdb:latest
@@ -83,8 +82,8 @@ services:
     ports:
       - 8086:8086
     volumes:
-      - ../../services/data/influxdb_data:/var/lib/influxdb2
-      - ../../services/data/influxdb_config:/etc/influxdb2
+      - influxdb_data:/var/lib/influxdb2
+      - influxdb_config:/etc/influxdb2
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=grafana
@@ -95,9 +94,6 @@ services:
 
 volumes:
   grafana_data:
-    driver: local
   influxdb_data:
-    driver: local
   influxdb_config:
-    driver: local
 

@@ -1,4 +1,4 @@
-# mqtt broker with influxdb and grafana
+# time slot services and databases
 version: "2.1"
 services:
 
@@ -42,18 +42,18 @@ services:
       - BUCKET=jarvil-bucket
       - TOKEN=V_g3T7i-QyHF3e_uDvBE05MRVKd-234xHwLDACXuw457UnhEBFOVP1Cr5IVb1EclrG6IRS5uBjMbOhMidnu8kA==
   
-  grafana:
+  control-dashboard:
     # root path due to github actions file copy
-    image: grafana/grafana
-    container_name: grafana
+    build: ./services/control-dashboard
+    container_name: control-dashboard
     restart: always
     ports:
       - 3000:3000
-    depends_on:
-      - influxdb
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=password
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true
 
   influxdb:
-    # root path due to github actions file copy
     image: influxdb:latest
     container_name: influxdb
     restart: always
