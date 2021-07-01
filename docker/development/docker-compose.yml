@@ -10,6 +10,12 @@ services:
     volumes:
       - ../../services/mqtt-broker:/mosquitto
 
+  decision-maker:
+    build: ../../services/decision-maker
+    container_name: decision-maker
+    volumes:
+      - ../../services/decision-maker:/decision-maker
+
   time-slot-booking:
     build: ../../services/time-slot-booking
     container_name: time-slot-booking
@@ -54,8 +60,6 @@ services:
       - ../../services/mqtt-client:/client
     links:
       - "influxdb"
-    volumes:
-      - ../../services/mqtt-client:/client
     environment:
       - MQTT_HOST=mqtt-broker
       - ORG=jarvil

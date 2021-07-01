@@ -1,0 +1,4 @@
+paho-mqtt
+fire
+requests
+git+https://github.com/remykarem/py2pddl#egg=py2pddl
