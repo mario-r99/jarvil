@@ -14,7 +14,7 @@ readout_frequency = 1
 # Client initialization
 client = mqtt.Client()
 
-# Connect to mqtt client and start loop
+# Connect to mqtt broker and start loop
 client.connect(broker_host)
 client.loop_start()
 

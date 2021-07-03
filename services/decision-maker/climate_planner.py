@@ -1,5 +1,8 @@
 from py2pddl import Domain, create_type
 from py2pddl import predicate, action
+# import subprocess
+
+# subprocess.call(['python', 'subscriber.py'])
 
 class ClimateDomain(Domain):
 

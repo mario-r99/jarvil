@@ -10,12 +10,6 @@ services:
     volumes:
       - ../../services/mqtt-broker:/mosquitto
 
-  decision-maker:
-    build: ../../services/decision-maker
-    container_name: decision-maker
-    volumes:
-      - ../../services/decision-maker:/decision-maker
-
   time-slot-booking:
     build: ../../services/time-slot-booking
     container_name: time-slot-booking
@@ -52,6 +46,14 @@ services:
     container_name: redisinsight
     ports:
         - '8001:8001'
+
+  decision-maker:
+    build: ../../services/decision-maker
+    container_name: decision-maker
+    volumes:
+      - ../../services/decision-maker:/decision-maker
+    environment:
+      - MQTT_HOST=mqtt-broker
 
   mqtt-client:
     build: ../../services/mqtt-client
