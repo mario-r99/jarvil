@@ -1,6 +1,7 @@
 from py2pddl import Domain, create_type
 from py2pddl import predicate, action
 import os
+import json
 
 class ClimateDomain(Domain):
 
@@ -76,7 +77,6 @@ class ClimateDomain(Domain):
     
 
 from py2pddl import goal, init
-from executor import state
 
 class ClimateProblem(ClimateDomain):
 
@@ -91,8 +91,10 @@ class ClimateProblem(ClimateDomain):
 
     @init
     def init(self):
-        mqtt_data = os.environ["MQTT_DATA"]
-        print("Environment data: " + mqtt_data)
+        epsilon_temperature = 1
+        json_state = os.environ["MQTT_DATA"]
+        print("Environment data: " + json_state)
+        initial_state = json.loads(json_state)
         at = [self.at_person(self.rooms["workingArea"], self.occupants["occupant"]),
               
             #   self.high(self.sensors["temperatureW"]),
@@ -117,8 +119,10 @@ class ClimateProblem(ClimateDomain):
               self.low(self.sensors["brightness"]),
               self.contol_with(self.sensors["brightness"], self.actuators["light"]),
               self.at(self.rooms["workingArea"], self.sensors["brightness"], self.actuators["light"])]
-        if (initial_state['temperature_log']-initial_state['temperature_set'] >= epsilon):
+        if (initial_state['temperature_log']-initial_state['temperature_def'] >= epsilon_temperature):
             at.append(self.high(self.sensors["temperatureW"]))
+        if (initial_state['temperature_log']-initial_state['temperature_def'] < -epsilon_temperature):
+            at.append(self.low(self.sensors["temperatureW"]))
         return at
 
     @goal

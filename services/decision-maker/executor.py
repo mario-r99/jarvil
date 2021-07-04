@@ -8,7 +8,7 @@ import json
 broker_host = os.environ['MQTT_HOST']
 publish_frequency = 10
 actuator_status = {}
-mqtt_data = {}
+mqtt_data = {"temperature_log":24,"temperature_def":20}
 topic_climate = "climate-service/+/value/climate/state"
 topic_dashboard = "control-dashboard/+/value/+/setpoint"
 last_sending_time = time.time() - publish_frequency
@@ -17,6 +17,7 @@ last_sending_time = time.time() - publish_frequency
 client = mqtt.Client()
 
 def execute_planner():
+    print("Executing the plan")
     os.system("python -m py2pddl.parse climate_planner.py")
 
     data = {'domain': open('domain.pddl', 'r').read(),
