@@ -1,8 +1,6 @@
 from py2pddl import Domain, create_type
 from py2pddl import predicate, action
-# import subprocess
-
-# subprocess.call(['python', 'subscriber.py'])
+import os
 
 class ClimateDomain(Domain):
 
@@ -92,6 +90,8 @@ class ClimateProblem(ClimateDomain):
 
     @init
     def init(self):
+        mqtt_data = os.environ["MQTT_DATA"]
+        print("Environment data: " + mqtt_data)
         at = [self.at_person(self.rooms["workingArea"], self.occupants["occupant"]),
               
               self.high(self.sensors["temperatureW"]),
