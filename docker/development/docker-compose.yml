@@ -50,6 +50,8 @@ services:
   decision-maker:
     build: ../../services/decision-maker
     container_name: decision-maker
+    depends_on:
+      - mqtt-broker
     volumes:
       - ../../services/decision-maker:/decision-maker
     environment:

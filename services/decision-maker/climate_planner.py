@@ -78,6 +78,7 @@ class ClimateDomain(Domain):
     
 
 from py2pddl import goal, init
+from executor import state
 
 class ClimateProblem(ClimateDomain):
 
@@ -92,9 +93,12 @@ class ClimateProblem(ClimateDomain):
 
     @init
     def init(self):
+        initial_state = state
+        epsilon = 1
+        print('Am here!!')
         at = [self.at_person(self.rooms["workingArea"], self.occupants["occupant"]),
               
-              self.high(self.sensors["temperatureW"]),
+            #   self.high(self.sensors["temperatureW"]),
               self.on(self.actuators["thermostatW"]),
               self.contol_with(self.sensors["temperatureW"], self.actuators["thermostatW"]),
               self.at(self.rooms["workingArea"], self.sensors["temperatureW"], self.actuators["thermostatW"]),
@@ -116,6 +120,8 @@ class ClimateProblem(ClimateDomain):
               self.low(self.sensors["brightness"]),
               self.contol_with(self.sensors["brightness"], self.actuators["light"]),
               self.at(self.rooms["workingArea"], self.sensors["brightness"], self.actuators["light"])]
+        if (initial_state['temperature_log']-initial_state['temperature_set'] >= epsilon):
+            at.append(self.high(self.sensors["temperatureW"]))
         return at
 
     @goal

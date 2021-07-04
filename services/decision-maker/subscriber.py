@@ -13,14 +13,14 @@ def log_climate(service_name,device_id,value_name,payload):
     measurement_name = service_name + "_" + value_name
     data=json.loads(payload)
     for key in data:
-        log = f"{measurement_name},host={device_id} {key}={data[key]}"
+        print('get message:', data[key])
     return
 
 def log_setpoint(service_name, device_id, value_name, payload):
     measurement_name = service_name + "_" + value_name
     data=json.loads(payload)
     for key in data:
-        log = f"{measurement_name},host={device_id} {key}={data[key]}"
+        print('get message:', data[key])
     return
 
 def invalid_service(service_name):
