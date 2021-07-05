@@ -27,7 +27,7 @@ last_sending_time = time.time() - publish_frequency
 client = mqtt.Client()
 
 def execute_planner():
-    print("Executing the plan")
+    print("Create a plan")
     os.system("python -m py2pddl.parse climate_planner.py")
 
     data = {'domain': open('domain.pddl', 'r').read(),
@@ -35,13 +35,18 @@ def execute_planner():
 
     responce = requests.post('http://solver.planning.domains/solve', json=data).json()
 
+    print("Executing the plan")
     try:
         for act in responce['result']['plan']:
             print(str(act['name']))
             action = str(act['name'])[1:-1].split()
             if action[0] == 'switch-on':
                 actuator_status[action[2]] = True
+            if action[0] == 'wait_increase':
+                actuator_status[action[2]] = True
             if action[0] == 'switch-off':
+                actuator_status[action[2]] = False
+            if action[0] == 'wait_decrease':
                 actuator_status[action[2]] = False
             if action[0] == 'energy-eco':
                 actuator_status[action[2]] = False
@@ -74,7 +79,7 @@ def on_message(client, userdata, msg):
             mqtt_data["brightness_log"] = json.loads(decoded_payload)["brightness"]
             mqtt_data["humidity_log"] = json.loads(decoded_payload)["humidity"]
             mqtt_data["aircondition_log"] = json.loads(decoded_payload)["aircondition"]
-        if value_name == "actuators":
+        elif value_name == "actuators":
             mqtt_data["thermostat"] = json.loads(decoded_payload)["thermostat"]
             mqtt_data["light"] = json.loads(decoded_payload)["light"]
             mqtt_data["humidifier"] = json.loads(decoded_payload)["humidifier"]
@@ -82,14 +87,14 @@ def on_message(client, userdata, msg):
         else:
             print("ERROR: undefined vaue name - ", value_name)
 
-    if service_name == "control-dashboard":
+    elif service_name == "control-dashboard":
         if value_name == "temperature":
             mqtt_data["temperature_def"] = json.loads(decoded_payload)["set"]
-        if value_name == "brightness":
+        elif value_name == "brightness":
             mqtt_data["brightness_def"] = json.loads(decoded_payload)["set"]
-        if value_name == "humidity":
+        elif value_name == "humidity":
             mqtt_data["humidity_def"] = json.loads(decoded_payload)["set"]
-        if value_name == "aircondition":
+        elif value_name == "aircondition":
             mqtt_data["aircondition_def"] = json.loads(decoded_payload)["set"]
         else:
             print("ERROR: undefined value name - ", value_name)
@@ -105,7 +110,6 @@ def on_message(client, userdata, msg):
         execute_planner()
 
 # first plan
-
 execute_planner()
 
 client.on_connect = on_connect
