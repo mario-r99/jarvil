@@ -21,6 +21,7 @@ mqtt_data = {"temperature_log":24,"temperature_def":20, # initial definiton
              "light": False} 
 topic_climate = "climate-service/+/value/+/state"
 topic_dashboard = "control-dashboard/+/value/+/setpoint"
+topic_decision = "decision-maker/0/value/actuators/setpoint"
 last_sending_time = time.time() - publish_frequency
 
 # # Client initialization
@@ -42,11 +43,11 @@ def execute_planner():
             action = str(act['name'])[1:-1].split()
             if action[0] == 'switch-on':
                 actuator_status[action[2]] = True
-            if action[0] == 'wait_increase':
+            if action[0] == 'wait-increase':
                 actuator_status[action[2]] = True
             if action[0] == 'switch-off':
                 actuator_status[action[2]] = False
-            if action[0] == 'wait_decrease':
+            if action[0] == 'wait-decrease':
                 actuator_status[action[2]] = False
             if action[0] == 'energy-eco':
                 actuator_status[action[2]] = False
@@ -55,8 +56,8 @@ def execute_planner():
 
     actuator_status_out = json.dumps(actuator_status)
 
-    print("Publishing actuators setpoints:", actuator_status_out)
-    # client.publish(actuator_topic, actuator_status_out)
+    print(f"Publishing actuators setpoints: {actuator_status_out}, on topic: {topic_decision}")
+    client.publish(topic_decision, actuator_status_out)
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -69,7 +70,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     # Compute only if last sending time is older than readout frequency
     decoded_payload =str(msg.payload.decode('UTF-8'))
-    print("Received payload: " + decoded_payload + ", on topic: " + msg.topic)
+    print(f"Received payload: {decoded_payload}, on topic: {msg.topic}")
     value_name = msg.topic.split("/")[-2]
     service_name = msg.topic.split("/")[0]
 
@@ -99,15 +100,18 @@ def on_message(client, userdata, msg):
         else:
             print("ERROR: undefined value name - ", value_name)
 
+    print(mqtt_data)
+    os.environ["MQTT_DATA"] = json.dumps(mqtt_data)
+    execute_planner()
 
     # Execute panner only if last update is older than update frequency
-    global last_sending_time
-    current_time = time.time()
-    if current_time - last_sending_time > publish_frequency:
-        last_sending_time = current_time
-        print(mqtt_data)
-        os.environ["MQTT_DATA"] = json.dumps(mqtt_data)
-        execute_planner()
+    # global last_sending_time
+    # current_time = time.time()
+    # if current_time - last_sending_time > publish_frequency:
+    #     last_sending_time = current_time
+    #     print(mqtt_data)
+    #     os.environ["MQTT_DATA"] = json.dumps(mqtt_data)
+    #     execute_planner()
 
 # first plan
 execute_planner()
