@@ -82,53 +82,87 @@ class ClimateProblem(ClimateDomain):
 
     def __init__(self):
         super().__init__()
-        self.actuators = ClimateDomain.Actuator.create_objs(["thermostatW", 
-            "thermostatB", "humidifier", "airfilter", "light"])
-        self.sensors = ClimateDomain.Sensor.create_objs(["temperatureW", 
-            "temperatureB", "humidity", "airpolusion", "brightness"])
+        self.actuators = ClimateDomain.Actuator.create_objs(["thermostat", "humidifier", "airfilter", "light"])
+        self.sensors = ClimateDomain.Sensor.create_objs(["temperature", "humidity", "aircondition", "brightness"])
         self.rooms = ClimateDomain.Room.create_objs(["workingArea", "bookcaseArea"])
         self.occupants = ClimateDomain.Person.create_objs(["occupant"])
 
     @init
     def init(self):
-        epsilon_temperature = 1
+
+        # Static state
+        at = [self.at_person(self.rooms["workingArea"], self.occupants["occupant"]),
+        
+    #   self.high(self.sensors["temperatureW"]),
+        # self.on(self.actuators["thermostat"]),
+        self.contol_with(self.sensors["temperature"], self.actuators["thermostat"]),
+        self.at(self.rooms["workingArea"], self.sensors["temperature"], self.actuators["thermostat"]),
+
+    #   self.low(self.sensors["temperatureB"]),
+    #   self.contol_with(self.sensors["temperatureB"], self.actuators["thermostatB"]),
+    #   self.at(self.rooms["bookcaseArea"], self.sensors["temperatureB"], self.actuators["thermostatB"]),
+
+    #   self.low(self.sensors["humidity"]),
+        # self.on(self.actuators["humidifier"]),
+        self.contol_with(self.sensors["humidity"], self.actuators["humidifier"]),
+        self.at(self.rooms["workingArea"], self.sensors["humidity"], self.actuators["humidifier"]),
+
+    #   self.high(self.sensors["aircondition"]),
+    #   self.on(self.actuators["airfilter"]),
+        self.contol_with(self.sensors["aircondition"], self.actuators["airfilter"]),
+        self.at(self.rooms["workingArea"], self.sensors["aircondition"], self.actuators["airfilter"]),
+
+    #   self.low(self.sensors["brightness"]),
+        self.contol_with(self.sensors["brightness"], self.actuators["light"]),
+        self.at(self.rooms["workingArea"], self.sensors["brightness"], self.actuators["light"])]
+
+        # Defining normal range
+        epsilon_temperature = 0.5
+        epsilon_humidity = 0.03
+        epsilon_brightness = 0.03
+        epsilon_aircondition = 0.03
+
+        #Getting mqtt logs
         json_state = os.environ["MQTT_DATA"]
         print("Environment data: " + json_state)
         initial_state = json.loads(json_state)
-        at = [self.at_person(self.rooms["workingArea"], self.occupants["occupant"]),
-              
-            #   self.high(self.sensors["temperatureW"]),
-              self.on(self.actuators["thermostatW"]),
-              self.contol_with(self.sensors["temperatureW"], self.actuators["thermostatW"]),
-              self.at(self.rooms["workingArea"], self.sensors["temperatureW"], self.actuators["thermostatW"]),
+        
+        if initial_state != None:
+            print("Reading out the predicates")
+            if (initial_state['temperature_log']-initial_state['temperature_def'] >= epsilon_temperature):
+                at.append(self.high(self.sensors["temperature"]))
+            if (initial_state['temperature_log']-initial_state['temperature_def'] <= -epsilon_temperature):
+                at.append(self.low(self.sensors["temperature"]))
+            if (initial_state['thermostat']):
+                at.append(self.on(self.actuators["thermostat"]))
 
-              self.low(self.sensors["temperatureB"]),
-              self.contol_with(self.sensors["temperatureB"], self.actuators["thermostatB"]),
-              self.at(self.rooms["bookcaseArea"], self.sensors["temperatureB"], self.actuators["thermostatB"]),
+            if (initial_state['humidity_log']-initial_state['humidity_def'] >= epsilon_humidity):
+                at.append(self.high(self.sensors["humidity"]))
+            if (initial_state['humidity_log']-initial_state['humidity_def'] <= -epsilon_humidity):
+                at.append(self.low(self.sensors["humidity"]))
+            if (initial_state['humidifier']):
+                at.append(self.on(self.actuators["humidifier"]))
 
-              self.low(self.sensors["humidity"]),
-              self.on(self.actuators["humidifier"]),
-              self.contol_with(self.sensors["humidity"], self.actuators["humidifier"]),
-              self.at(self.rooms["workingArea"], self.sensors["humidity"], self.actuators["humidifier"]),
+            if (initial_state['brightness_log']-initial_state['brightness_def'] >= epsilon_brightness):
+                at.append(self.high(self.sensors["brightness"]))
+            if (initial_state['brightness_log']-initial_state['brightness_def'] <= -epsilon_brightness):
+                at.append(self.low(self.sensors["brightness"]))
+            if (initial_state['light']):
+                at.append(self.on(self.actuators["light"]))
 
-              self.high(self.sensors["airpolusion"]),
-            #   self.on(self.actuators["airfilter"]),
-              self.contol_with(self.sensors["airpolusion"], self.actuators["airfilter"]),
-              self.at(self.rooms["workingArea"], self.sensors["airpolusion"], self.actuators["airfilter"]),
+            if (initial_state['aircondition_log']-initial_state['aircondition_def'] >= epsilon_aircondition):
+                at.append(self.high(self.sensors["aircondition"]))
+            if (initial_state['aircondition_log']-initial_state['aircondition_def'] <= -epsilon_aircondition):
+                at.append(self.low(self.sensors["aircondition"]))
+            if (initial_state['airfilter']):
+                at.append(self.on(self.actuators["airfilter"]))
 
-              self.low(self.sensors["brightness"]),
-              self.contol_with(self.sensors["brightness"], self.actuators["light"]),
-              self.at(self.rooms["workingArea"], self.sensors["brightness"], self.actuators["light"])]
-        if (initial_state['temperature_log']-initial_state['temperature_def'] >= epsilon_temperature):
-            at.append(self.high(self.sensors["temperatureW"]))
-        if (initial_state['temperature_log']-initial_state['temperature_def'] < -epsilon_temperature):
-            at.append(self.low(self.sensors["temperatureW"]))
         return at
 
     @goal
     def goal(self):
-        return [~self.low(self.sensors["temperatureW"]),~self.high(self.sensors["temperatureW"]),
-                ~self.low(self.sensors["temperatureB"]),~self.high(self.sensors["temperatureB"]),
+        return [~self.low(self.sensors["temperature"]),~self.high(self.sensors["temperature"]),
+                # ~self.low(self.sensors["temperatureB"]),~self.high(self.sensors["temperatureB"]),
                 ~self.low(self.sensors["humidity"]),~self.high(self.sensors["humidity"]),
-                ~self.low(self.sensors["airpolusion"]),~self.high(self.sensors["airpolusion"]),
+                ~self.low(self.sensors["aircondition"]),~self.high(self.sensors["aircondition"]),
                 ~self.low(self.sensors["brightness"]),~self.high(self.sensors["brightness"])]

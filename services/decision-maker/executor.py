@@ -7,9 +7,19 @@ import json
 # Global definitions
 broker_host = os.environ['MQTT_HOST']
 publish_frequency = 10
-actuator_status = {}
-mqtt_data = {"temperature_log":24,"temperature_def":20}
-topic_climate = "climate-service/+/value/climate/state"
+actuator_status = {"thermostat": False,
+                   "humidifier": False,
+                   "airfilter": False,
+                   "light": False}
+mqtt_data = {"temperature_log":24,"temperature_def":20, # initial definiton
+             "brightness_log":0.8,"brightness_def":0.8, # so that the state is fully defined
+             "humidity_log":0.5,"humidity_def":0.5,
+             "aircondition_log":0.5,"aircondition_def":0.5,
+             "thermostat": False,
+             "humidifier": False,
+             "airfilter": False,
+             "light": False} 
+topic_climate = "climate-service/+/value/+/state"
 topic_dashboard = "control-dashboard/+/value/+/setpoint"
 last_sending_time = time.time() - publish_frequency
 
@@ -25,19 +35,22 @@ def execute_planner():
 
     responce = requests.post('http://solver.planning.domains/solve', json=data).json()
 
-    for act in responce['result']['plan']:
-        print(str(act['name']))
-        action = str(act['name'])[1:-1].split()
-        if action[0] == 'switch-on':
-            actuator_status[action[2]] = True
-        if action[0] == 'switch-off':
-            actuator_status[action[2]] = False
-        if action[0] == 'energy-eco':
-            actuator_status[action[2]] = False
+    try:
+        for act in responce['result']['plan']:
+            print(str(act['name']))
+            action = str(act['name'])[1:-1].split()
+            if action[0] == 'switch-on':
+                actuator_status[action[2]] = True
+            if action[0] == 'switch-off':
+                actuator_status[action[2]] = False
+            if action[0] == 'energy-eco':
+                actuator_status[action[2]] = False
+    except:
+        print("zero plan")
 
     actuator_status_out = json.dumps(actuator_status)
 
-    print("Publishing sensor status:", actuator_status_out)
+    print("Publishing actuators setpoints:", actuator_status_out)
     # client.publish(actuator_topic, actuator_status_out)
 
 # The callback for when the client receives a CONNACK response from the server.
@@ -56,9 +69,18 @@ def on_message(client, userdata, msg):
     service_name = msg.topic.split("/")[0]
 
     if service_name == "climate-service":
-        mqtt_data["temperature_log"] = json.loads(decoded_payload)["temperature"]
-        mqtt_data["brightness_log"] = json.loads(decoded_payload)["brightness"]
-        mqtt_data["humidity_log"] = json.loads(decoded_payload)["humidity"]
+        if value_name == "sensors":
+            mqtt_data["temperature_log"] = json.loads(decoded_payload)["temperature"]
+            mqtt_data["brightness_log"] = json.loads(decoded_payload)["brightness"]
+            mqtt_data["humidity_log"] = json.loads(decoded_payload)["humidity"]
+            mqtt_data["aircondition_log"] = json.loads(decoded_payload)["aircondition"]
+        if value_name == "actuators":
+            mqtt_data["thermostat"] = json.loads(decoded_payload)["thermostat"]
+            mqtt_data["light"] = json.loads(decoded_payload)["light"]
+            mqtt_data["humidifier"] = json.loads(decoded_payload)["humidifier"]
+            mqtt_data["airfilter"] = json.loads(decoded_payload)["airfilter"]
+        else:
+            print("ERROR: undefined vaue name - ", value_name)
 
     if service_name == "control-dashboard":
         if value_name == "temperature":
@@ -67,6 +89,11 @@ def on_message(client, userdata, msg):
             mqtt_data["brightness_def"] = json.loads(decoded_payload)["set"]
         if value_name == "humidity":
             mqtt_data["humidity_def"] = json.loads(decoded_payload)["set"]
+        if value_name == "aircondition":
+            mqtt_data["aircondition_def"] = json.loads(decoded_payload)["set"]
+        else:
+            print("ERROR: undefined value name - ", value_name)
+
 
     # Execute panner only if last update is older than update frequency
     global last_sending_time
@@ -77,6 +104,9 @@ def on_message(client, userdata, msg):
         os.environ["MQTT_DATA"] = json.dumps(mqtt_data)
         execute_planner()
 
+# first plan
+
+execute_planner()
 
 client.on_connect = on_connect
 client.on_message = on_message
