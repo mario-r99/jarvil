@@ -43,29 +43,15 @@ class ClimateDomain(Domain):
     @action(Sensor, Actuator, Room, Person)
     def switch_on(self, s, a, r, p):
         precond = [self.at_person(r, p), self.contol_with(s, a), 
-            self.at(r, s, a), ~self.on(a), self.low(s)]
+            self.at(r, s, a), self.low(s)]
         effect = [self.on(a), ~self.low(s)]
-        return precond, effect
-
-    @action(Sensor, Actuator, Room, Person)
-    def wait_increase(self, s, a, r, p):
-        precond = [self.at_person(r, p), self.contol_with(s, a), 
-            self.at(r, s, a), self.on(a), self.low(s)]
-        effect = [~self.low(s)]
         return precond, effect
 
     @action(Sensor, Actuator, Room, Person)
     def switch_off(self, s, a, r, p):
         precond = [self.at_person(r, p), self.contol_with(s, a), 
-            self.at(r, s, a), self.on(a), self.high(s)]
+            self.at(r, s, a), self.high(s)]
         effect = [~self.on(a), ~self.high(s)]
-        return precond, effect
-
-    @action(Sensor, Actuator, Room, Person)
-    def wait_decrease(self, s, a, r, p):
-        precond = [self.at_person(r, p), self.contol_with(s, a), 
-            self.at(r, s, a), ~self.on(a), self.high(s)]
-        effect = [~self.high(s)]
         return precond, effect
 
     @action(Sensor, Actuator, Room, Person)
@@ -133,29 +119,21 @@ class ClimateProblem(ClimateDomain):
                 at.append(self.high(self.sensors["temperature"]))
             if (initial_state['temperature_log']-initial_state['temperature_def'] <= -epsilon_temperature):
                 at.append(self.low(self.sensors["temperature"]))
-            if (initial_state['thermostat']):
-                at.append(self.on(self.actuators["thermostat"]))
 
             if (initial_state['humidity_log']-initial_state['humidity_def'] >= epsilon_humidity):
                 at.append(self.high(self.sensors["humidity"]))
             if (initial_state['humidity_log']-initial_state['humidity_def'] <= -epsilon_humidity):
                 at.append(self.low(self.sensors["humidity"]))
-            if (initial_state['humidifier']):
-                at.append(self.on(self.actuators["humidifier"]))
 
             if (initial_state['brightness_log']-initial_state['brightness_def'] >= epsilon_brightness):
                 at.append(self.high(self.sensors["brightness"]))
             if (initial_state['brightness_log']-initial_state['brightness_def'] <= -epsilon_brightness):
                 at.append(self.low(self.sensors["brightness"]))
-            if (initial_state['light']):
-                at.append(self.on(self.actuators["light"]))
 
             if (initial_state['aircondition_log']-initial_state['aircondition_def'] >= epsilon_aircondition):
                 at.append(self.high(self.sensors["aircondition"]))
             if (initial_state['aircondition_log']-initial_state['aircondition_def'] <= -epsilon_aircondition):
                 at.append(self.low(self.sensors["aircondition"]))
-            if (initial_state['airfilter']):
-                at.append(self.on(self.actuators["airfilter"]))
 
         return at
 

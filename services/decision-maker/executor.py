@@ -6,7 +6,7 @@ import json
 
 # Global definitions
 broker_host = os.environ['MQTT_HOST']
-publish_frequency = 10
+# publish_frequency = 10
 actuator_status = {"thermostat": False,
                    "humidifier": False,
                    "airfilter": False,
@@ -14,15 +14,13 @@ actuator_status = {"thermostat": False,
 mqtt_data = {"temperature_log":24,"temperature_def":20, # initial definiton
              "brightness_log":0.8,"brightness_def":0.8, # so that the state is fully defined
              "humidity_log":0.5,"humidity_def":0.5,
-             "aircondition_log":0.5,"aircondition_def":0.5,
-             "thermostat": False,
-             "humidifier": False,
-             "airfilter": False,
-             "light": False} 
-topic_climate = "climate-service/+/value/+/state"
+             "aircondition_log":0.5,"aircondition_def":0.5
+             }
+
+topic_climate = "climate-service/+/value/sensors/state"
 topic_dashboard = "control-dashboard/+/value/+/setpoint"
 topic_decision = "decision-maker/0/value/actuators/setpoint"
-last_sending_time = time.time() - publish_frequency
+# last_sending_time = time.time() - publish_frequency
 
 # # Client initialization
 client = mqtt.Client()
@@ -80,11 +78,6 @@ def on_message(client, userdata, msg):
             mqtt_data["brightness_log"] = json.loads(decoded_payload)["brightness"]
             mqtt_data["humidity_log"] = json.loads(decoded_payload)["humidity"]
             mqtt_data["aircondition_log"] = json.loads(decoded_payload)["aircondition"]
-        elif value_name == "actuators":
-            mqtt_data["thermostat"] = json.loads(decoded_payload)["thermostat"]
-            mqtt_data["light"] = json.loads(decoded_payload)["light"]
-            mqtt_data["humidifier"] = json.loads(decoded_payload)["humidifier"]
-            mqtt_data["airfilter"] = json.loads(decoded_payload)["airfilter"]
         else:
             print("ERROR: undefined vaue name - ", value_name)
 
