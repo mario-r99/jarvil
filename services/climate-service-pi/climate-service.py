@@ -22,7 +22,7 @@ def publishingloop():
     airfilter_port = int(os.environ['AIRFILTER_PORT'])
     humidifier_port = int(os.environ['HUMIDIFIER_PORT'])
     thermostat_port = int(os.environ['THERMOSTAT_PORT'])
-    humidity_temperature_GPIO_Pin = int(os.environ['HUMIDITY_TEMPERATURE'])
+    humidity_temperature_GPIO_Pin = int(os.environ['HUMIDITY_TEMPERATURE_PORT'])
 
     sensors_topic = "climate-service/0/value/sensors/state"
     actuator_state_topic = "climate-service/0/value/actuators/state"
