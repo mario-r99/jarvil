@@ -26,7 +26,6 @@ def publishingloop():
     actuator_state_topic = "climate-service/value/actuators/state"
     readout_frequency = 2
 
-
     # Client initialization
     client = mqtt.Client()
 
