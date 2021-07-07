@@ -11,3 +11,8 @@ services:
       - MQTT_HOST=mqtt-broker
       - USB_PORT=/dev/ttyACM0
       - BRIGHTNESS_PORT=0
+      - AIRCONDITION_PORT=5
+      - LIGHT_PORT=8
+      - AIRFILTER_PORT=9
+      - HUMIDIFIER_PORT=10
+      - THERMOSTAT_PORT=11
