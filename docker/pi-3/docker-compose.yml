@@ -6,7 +6,7 @@ services:
     # root path due to github actions file copy
     build: ./services/climate-service-pi
     devices:
-      - COM4
+      - /dev/ttyACM0
     environment:
       - MQTT_HOST=mqtt-broker
       - USB_PORT=/dev/ttyACM0
