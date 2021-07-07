@@ -4,6 +4,7 @@ import time
 import os
 import json
 import threading
+import Adafruit_DHT
 
 actuator_setpoint = {"thermostat": False,
                     "humidifier": False,
@@ -15,16 +16,18 @@ def publishingloop():
     # Global definitions
     broker_host = os.environ['MQTT_HOST']
     usb_port = os.environ['USB_PORT']
-    brightness_port = os.environ['BRIGHTNESS_PORT']
-    aircondition_port = os.environ['AIRCONDITION_PORT']
-    light_port = os.environ['LIGHT_PORT']
-    airfilter_port = os.environ['AIRFILTER_PORT']
-    humidifier_port = os.environ['HUMIDIFIER_PORT']
-    thermostat_port = os.environ['THERMOSTAT_PORT']
+    brightness_port = int(os.environ['BRIGHTNESS_PORT'])
+    aircondition_port = int(os.environ['AIRCONDITION_PORT'])
+    light_port = int(os.environ['LIGHT_PORT'])
+    airfilter_port = int(os.environ['AIRFILTER_PORT'])
+    humidifier_port = int(os.environ['HUMIDIFIER_PORT'])
+    thermostat_port = int(os.environ['THERMOSTAT_PORT'])
+    humidity_temperature_GPIO_Pin = int(os.environ['HUMIDITY_TEMPERATURE_PORT'])
 
-    sensors_topic = "climate-service/value/sensors/state"
-    actuator_state_topic = "climate-service/value/actuators/state"
+    sensors_topic = "climate-service/0/value/sensors/state"
+    actuator_state_topic = "climate-service/0/value/actuators/state"
     readout_frequency = 2
+
 
     # Client initialization
     client = mqtt.Client()
@@ -44,14 +47,15 @@ def publishingloop():
     it = pyfirmata.util.Iterator(board)
     it.start()
 
+    # Sensor should be set to Adafruit_DHT.DHT11,
+    # Adafruit_DHT.DHT22, or Adafruit_DHT.AM2302.
+    DHTSensor = Adafruit_DHT.DHT11
+
     while True:
         #Read sensor status
         brightness_state = board.analog[brightness_port].read()
         air_state = board.analog[aircondition_port].read()
-        
-        # TODO
-        humidity_state = 0.0
-        temperature_state = 0.0
+        humidity_state, temperature_state = Adafruit_DHT.read_retry(DHTSensor, humidity_temperature_GPIO_Pin)
 
         #Read actuator status
 
@@ -59,7 +63,7 @@ def publishingloop():
             air_state == None or
             temperature_state == None or 
             humidity_state == None):
-            print("one of the sensors recieves None data!")
+            print("one of the sensors receives None data!")
             time.sleep(readout_frequency)
             continue
 
@@ -84,9 +88,9 @@ def publishingloop():
 
         ## Logging data 
         sensor_status = {"brightness":brightness_state,
-                        "air":air_state,
+                        "aircondition":air_state,
                         "temperature":temperature_state,
-                        "humidity":humidity_state}
+                        "humidity":humidity_state/100}
 
         actuator_status = {"light":light_state,
                         "airfilter":airfilter_state,
