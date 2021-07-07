@@ -21,12 +21,6 @@ def publishingloop():
     airfilter_port = os.environ['AIRFILTER_PORT']
     humidifier_port = os.environ['HUMIDIFIER_PORT']
     thermostat_port = os.environ['THERMOSTAT_PORT']
-    # temperature_port = 1
-    dht11_port = 2
-    light_port = 8
-    airfilter_port = 9
-    humidifier_port = 10
-    thermostat_port = 11
 
     sensors_topic = "climate-service/value/sensors/state"
     actuator_state_topic = "climate-service/value/actuators/state"

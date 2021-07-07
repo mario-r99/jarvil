@@ -1,17 +1,20 @@
-# time slot booking with redis cache
+# mqtt broker
 version: "2.1"
 services:
-  
-  time-slot-booking:
+    
+  mqtt-broker:
     # root path due to github actions file copy
-    build: ./services/time-slot-booking
-    container_name: time-slot-booking
+    build: ./services/mqtt-broker
+    container_name: mqtt-broker
+    restart: always
     ports:
-      - "5000:5000"
+      - 1883:1883
+      - 9001:9001
+    
+  decision-maker:
+    build: ../../services/decision-maker
+    container_name: decision-maker
+    depends_on:
+      - mqtt-broker
     environment:
-      - FLASK_ENV=production
       - MQTT_HOST=mqtt-broker
-
-  redis:
-    image: redis:alpine
-    container_name: redis

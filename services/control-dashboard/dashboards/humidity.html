@@ -1,0 +1,43 @@
+<script>
+    $(".minusH").mousedown(function () {
+        console.log("Humidity minus")
+        if (gradiH > min) {
+            console.log("Pushing new calculated value: " + (gradiH / 34 - 0.01).toFixed(2))
+            mqttMessage(((gradiH - 1) / 34).toFixed(2), humidityTopic)
+        }
+    });
+
+    $(".plusH").mousedown(function () {
+        console.log("Humidity plus")
+        if (gradiH < max) {
+            console.log("Pushing new calculated value: " + (gradiH / 34 + 0.01).toFixed(2))
+            mqttMessage(((gradiH + 1) / 34).toFixed(2), humidityTopic)
+        }
+    });
+
+</script>
+<div class="thermostat">
+    <div class="bar">
+        <div class="inner_bar"></div>
+        <div class='hold left'>
+            <div class='fill fillH fill1H'></div>
+        </div>
+        <div class='hold right'>
+            <div class='fill fillH fill2H'></div>
+        </div>
+        <span>Humidify</span>
+    </div>
+    <div class="shadow shadowH">
+        <div class="shadow-cubeH"></div>
+    </div>
+    <div class="number numberH">
+        <span class="ext extH">...</span>
+    </div>
+    <div class="center">
+        <span class="arrow minus minusH"><i class="material-icons">keyboard_arrow_left</i></span>
+        <span class="arrow plus plusH"><i class="material-icons">keyboard_arrow_right</i></span>
+        <div class="small">
+            <span class="heat heatH">...</span>
+        </div>
+    </div>
+</div>
