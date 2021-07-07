@@ -2,159 +2,148 @@ import paho.mqtt.client as mqtt
 import pyfirmata
 import time
 import json
-import datetime
-# import array
-import numpy as np
+# import RPi.GPIO as GPIO
+# import Adafruit_DHT
+import threading
 
-# Global definitions
-broker_host = "localhost"
-usb_port = 'COM6'
-brightness_port = 0
-air_port = 5
-# temperature_port = 1
-dht11_port = 2
-light_port = 8
-sensors_topic = "pc-1/climate-service/value/sensors/state"
-actuator_state_topic = "pc-1/climate-service/value/actuators/state"
-readout_frequency = 2
-
-# Configuration
-brightness_switching_state = 0.75
-
-
-# Client initialization
-client = mqtt.Client()
-
-# Connect to mqtt client and start loop
-client.connect(broker_host)
-client.loop_start()
-
-def current_micros_time():
-    return round(time.time() * 1000000)
-
-# Setup arduino connection
-board = pyfirmata.Arduino(usb_port)
-board.analog[brightness_port].mode = pyfirmata.INPUT
-board.analog[air_port].mode = pyfirmata.INPUT
-# board.analog[temperature_port].mode = pyfirmata.INPUT
-board.digital[light_port].mode = pyfirmata.OUTPUT
-it = pyfirmata.util.Iterator(board)
-it.start()
-# starting_time_mcs = datetime.now().microseconds
-starting_time_mcs = current_micros_time()
-
-def delay_timer(delay_value):
-    delay_time = current_micros_time()
-    while (current_micros_time() - delay_time) < delay_value:
-        pass
-
-def read_DHT11(port):
-    temp = 0
-    hum = 0
-    dht_error = False
-
-    data_time = 0
-    result = np.ndarray([])
-    # dht_data = array("B")
-    dht_data = np.ndarray([])
-    data_array = 0
-    # data_counter = 0
-    block_dht = False
-
-    # Trigger Sensor 
-    board.digital[port].mode = pyfirmata.OUTPUT
-    board.digital[port].write(1)
-    delay_timer(250000) #Wait 250millisec
-    board.digital[port].write(0)
-    delay_timer(20000) #Wait 30millisec
-    board.digital[port].write(1)
-    delay_timer(40) #Wait 50microsec
-    board.digital[port].mode = pyfirmata.INPUT
-    delay_timer(50)
-    while True:
-        print("bug ",board.digital[port].read())
-
-
-    while True:
-        if board.digital[port].read() == 0 and block_dht == False:
-            block_dht = True
-            result[data_array] = current_micros_time() - starting_time_mcs - data_time
-            data_array+=1
-            data_time = current_micros_time() - starting_time_mcs
-        # If DHT pin is low, go to next Dataset
-        if board.digital[port].read() == 1:
-            block_dht = False
-        if ((current_micros_time() - starting_time_mcs - data_time) < 150): #if DTH Sensor high for more than 150 usec, leave loop
-            break
-
-    # Asign 1 or 0 to Result variable. If more than 80uS Data as "1"
-    # Starting at Data set 02. First two Datasets are ignored!
-    for i in range(2,data_array):
-        if result[i] <= 90:
-            result[i]=0
-        else:
-            result[i]=1
-    
-    dht_data = np.packbits(result[2:42].reshape((5,8)))
-
-    if (dht_data[4]==np.sum(dht_data[:4])):
-        hum = dht_data[0]
-        temp = float(f"{dht_data[2]}.{dht_data[3]}")
-        dht_error = False
-    else:
-        dht_error = True
-
-    return temp, hum
+actuator_setpoint = {"thermostat": False,
+                    "humidifier": False,
+                    "airfilter": False,
+                    "light": False}
 
 # Sensor readout loop
-while True:
-    #Read sensor status
-    brightness_state = board.analog[brightness_port].read()
-    air_state = board.analog[air_port].read()
-    # temperature_state = board.analog[temperature_port].read()
-    temperature_state,humidity_state = read_DHT11(dht11_port)
-    # TODO
-    # humidity_state = 0.0
+def publishingloop():
+    # Global definitions
+    broker_host = "localhost"
+    usb_port = 'COM4'
+    brightness_port = 0
+    air_port = 5
+    # temperature_port = 1
+    dht11_port = 2
+    light_port = 8
+    airfilter_port = 9
+    humidifier_port = 10
+    thermostat_port = 11
 
-    #Read actuator status
-    # light_state = board.digital[light_port].read()
+    sensors_topic = "climate-service/value/sensors/state"
+    actuator_state_topic = "climate-service/value/actuators/state"
+    readout_frequency = 2
 
-    if (brightness_state == None or 
-        air_state == None or
-        temperature_state == None or 
-        humidity_state == None):
-        print("one of the sensors recieves None data!")
+
+    # Client initialization
+    client = mqtt.Client()
+
+    # Connect to mqtt client and start loop
+    client.connect(broker_host)
+    client.loop_start()
+
+    # Setup arduino connection
+    board = pyfirmata.Arduino(usb_port)
+    board.analog[brightness_port].mode = pyfirmata.INPUT
+    board.analog[air_port].mode = pyfirmata.INPUT
+    board.digital[light_port].mode = pyfirmata.OUTPUT
+    board.digital[airfilter_port].mode = pyfirmata.OUTPUT
+    board.digital[humidifier_port].mode = pyfirmata.OUTPUT
+    board.digital[thermostat_port].mode = pyfirmata.OUTPUT
+    it = pyfirmata.util.Iterator(board)
+    it.start()
+
+    while True:
+        #Read sensor status
+        brightness_state = board.analog[brightness_port].read()
+        air_state = board.analog[air_port].read()
+        
+        # TODO
+        humidity_state = 0.0
+        temperature_state = 0.0
+
+        #Read actuator status
+
+        if (brightness_state == None or 
+            air_state == None or
+            temperature_state == None or 
+            humidity_state == None):
+            print("one of the sensors recieves None data!")
+            time.sleep(readout_frequency)
+            continue
+
+        # Set actuators
+        board.digital[light_port].write(not actuator_setpoint["light"])
+        board.digital[airfilter_port].write(not actuator_setpoint["airfilter"])
+        board.digital[humidifier_port].write(not actuator_setpoint["humidifier"])
+        board.digital[thermostat_port].write(not actuator_setpoint["thermostat"])
+        
+        #Read actuator status
+        light_state = not board.digital[light_port].read()
+        airfilter_state = not board.digital[airfilter_port].read()
+        humidifier_state = not board.digital[humidifier_port].read()
+        thermostat_state = not board.digital[thermostat_port].read()
+        if (light_state == None or 
+            airfilter_state == None or
+            humidifier_state == None or
+            thermostat_state == None):
+            print("one of the actuators recieves None data!")
+            time.sleep(readout_frequency)
+            continue
+
+        ## Logging data 
+        sensor_status = {"brightness":brightness_state,
+                        "air":air_state,
+                        "temperature":temperature_state,
+                        "humidity":humidity_state}
+
+        actuator_status = {"light":light_state,
+                        "airfilter":airfilter_state,
+                        "humidifier":humidifier_state,
+                        "thermostat":thermostat_state}
+        
+        sensor_status_out = json.dumps(sensor_status)
+        actuator_status_out = json.dumps(actuator_status)
+
+        print("Publishing sensor status:", sensor_status_out)
+        client.publish(sensors_topic, sensor_status_out)
+
+        print("Publishing actuators status:", actuator_status_out)
+        client.publish(actuator_state_topic, actuator_status_out)
+
         time.sleep(readout_frequency)
-        continue
 
-    # Set actuators
-    if brightness_state < brightness_switching_state:
-        board.digital[light_port].write(0)
-    elif brightness_state >= brightness_switching_state:
-        board.digital[light_port].write(1)
+def subscribingloop():
+    # Global definitions
+    broker_host = "localhost"
+    global actuator_setpoint
 
-    #Read actuator status
-    light_state = board.digital[light_port].read()
-    if (light_state == None):
-        print("one of the actuators recieves None data!")
-        time.sleep(readout_frequency)
-        continue
+    topic_decision = "decision-maker/0/value/actuators/setpoint"
 
-    ## Logging data 
-    sensor_status = {"brightness":brightness_state,
-                     "air":air_state,
-                     "temperature":temperature_state,
-                     "humidity":humidity_state}
+    # # Client initialization
+    client = mqtt.Client()
+    # The callback for when the client receives a CONNACK response from the server.
+    def on_connect(client, userdata, flags, rc):
+        print("Connected with result code "+str(rc))
+        # Subscribing in on_connect() means that if we lose the connection and
+        # reconnect then subscriptions will be renewed.
+        client.subscribe(topic_decision)
 
-    actuator_status = {"light":light_state}
-    
-    sensor_status_out = json.dumps(sensor_status)
-    actuator_status_out = json.dumps(actuator_status)
+    def on_message(client, userdata, msg):
+        # Compute only if last sending time is older than readout frequency
+        decoded_payload =str(msg.payload.decode('UTF-8'))
+        print(f"Received payload: {decoded_payload}, on topic: {msg.topic}")
+        data=json.loads(decoded_payload)
+        for key in data:
+            actuator_setpoint[key] = data[key]
 
-    print("Publishing sensor status:", sensor_status_out)
-    client.publish(sensors_topic, sensor_status_out)
+    print("Initial state: ", actuator_setpoint)
 
-    print("Publishing actuators state status:", actuator_status_out)
-    client.publish(actuator_state_topic, actuator_status_out)
+    client.on_connect = on_connect
+    client.on_message = on_message
 
-    time.sleep(readout_frequency)
+
+    # # Connect to mqtt broker and start loop
+    client.connect(broker_host)
+    client.loop_forever()
+
+thread1 = threading.Thread(target=publishingloop)
+thread1.start()
+
+thread2 = threading.Thread(target=subscribingloop)
+thread2.start()
