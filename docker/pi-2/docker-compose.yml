@@ -10,3 +10,11 @@ services:
     ports:
       - 1883:1883
       - 9001:9001
+    
+  decision-maker:
+    build: ../../services/decision-maker
+    container_name: decision-maker
+    depends_on:
+      - mqtt-broker
+    environment:
+      - MQTT_HOST=mqtt-broker

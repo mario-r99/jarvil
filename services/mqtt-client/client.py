@@ -1,7 +1,6 @@
 import paho.mqtt.client as mqtt
 import os
 import json
-from functools import partial
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 
@@ -16,9 +15,11 @@ token = os.environ['TOKEN']
 org = os.environ['ORG']
 bucket = os.environ['BUCKET']
 
+# Influxdb client configuration
 client = InfluxDBClient(url="http://influxdb:8086", token=token)
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
+# Logging functions to influxdb
 def log_climate(service_name,device_id,value_name,payload):
     measurement_name = service_name + "_" + value_name
     data=json.loads(payload)

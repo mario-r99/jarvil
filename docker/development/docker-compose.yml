@@ -47,6 +47,16 @@ services:
     ports:
         - '8001:8001'
 
+  decision-maker:
+    build: ../../services/decision-maker
+    container_name: decision-maker
+    depends_on:
+      - mqtt-broker
+    volumes:
+      - ../../services/decision-maker:/decision-maker
+    environment:
+      - MQTT_HOST=mqtt-broker
+
   mqtt-client:
     build: ../../services/mqtt-client
     container_name: mqtt-client
@@ -54,8 +64,6 @@ services:
       - ../../services/mqtt-client:/client
     links:
       - "influxdb"
-    volumes:
-      - ../../services/mqtt-client:/client
     environment:
       - MQTT_HOST=mqtt-broker
       - ORG=jarvil
