@@ -57,8 +57,6 @@ def publishingloop():
         humidity_state = 0.0
         temperature_state = 0.0
 
-        #Read actuator status
-
         if (brightness_state == None or 
             air_state == None or
             temperature_state == None or 
