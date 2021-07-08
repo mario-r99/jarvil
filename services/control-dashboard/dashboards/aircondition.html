@@ -1,0 +1,43 @@
+<script>
+    $(".minusA").mousedown(function () {
+        console.log("Aircondition minus")
+        if (gradiA > min) {
+            console.log("Pushing new calculated value: " + (gradiA / 34 - 0.01).toFixed(2))
+            mqttMessage(((gradiA - 1) / 34).toFixed(2), airconditionTopic)
+        }
+    });
+
+    $(".plusA").mousedown(function () {
+        console.log("Aircondition plus")
+        if (gradiA < max) {
+            console.log("Pushing new calculated value: " + (gradiA / 34 + 0.01).toFixed(2))
+            mqttMessage(((gradiA + 1) / 34).toFixed(2), airconditionTopic)
+        }
+    });
+
+</script>
+<div class="thermostat">
+    <div class="bar">
+        <div class="inner_bar"></div>
+        <div class='hold left'>
+            <div class='fill fillA fill1A'></div>
+        </div>
+        <div class='hold right'>
+            <div class='fill fillA fill2A'></div>
+        </div>
+        <span>Air Cleaner</span>
+    </div>
+    <div class="shadow shadowA">
+        <div class="shadow-cubeA"></div>
+    </div>
+    <div class="number numberA">
+        <span class="ext extA">...</span>
+    </div>
+    <div class="center">
+        <span class="arrow minus minusA"><i class="material-icons">keyboard_arrow_left</i></span>
+        <span class="arrow plus plusA"><i class="material-icons">keyboard_arrow_right</i></span>
+        <div class="small">
+            <span class="heat heatA">...</span>
+        </div>
+    </div>
+</div>

@@ -75,6 +75,14 @@
         height: 0px;
         box-shadow: 0 0 45px 13px rgba(255, 240, 35, 0.5);
     }
+    
+    .thermostat .shadow .shadow-cubeA {
+        position: absolute;
+        top: 0;
+        width: 25px;
+        height: 0px;
+        box-shadow: 0 0 45px 13px rgba(35, 240, 255, 0.5);
+    }
 
     .thermostat .number {
         position: absolute;
@@ -149,7 +157,6 @@
     .thermostat .bar .fill1T {
         background: -webkit-linear-gradient(top, #ff4900 20%, #ff4900 100%);
     }
-
     .thermostat .bar .fill2T {
         background: -webkit-linear-gradient(top, #ff4900 40%, #ff9e23 100%);
     }
@@ -157,7 +164,6 @@
     .thermostat .bar .fill1H {
         background: -webkit-linear-gradient(top, #00ff80 20%, #00ff80 100%);
     }
-
     .thermostat .bar .fill2H {
         background: -webkit-linear-gradient(top, #00ff80 40%, #7effb8 100%);
     }
@@ -165,10 +171,18 @@
     .thermostat .bar .fill1B {
         background: -webkit-linear-gradient(top, #ffe600 20%, #ffe600 100%);
     }
-
     .thermostat .bar .fill2B {
         background: -webkit-linear-gradient(top, #ffe600 40%, #fff27e 100%);
     }
+    
+    .thermostat .bar .fill1A {
+        background: -webkit-linear-gradient(top, #00aeff 20%, #00aeff 100%);
+    }
+    .thermostat .bar .fill2A {
+        background: -webkit-linear-gradient(top, #00aeff 40%, #7ee1ff 100%);
+    }
+
+
 
     .thermostat .bar .right {
         z-index: 3;
@@ -372,6 +386,7 @@
     var gradiT = 19;
     var gradiB = 19;
     var gradiH = 19;
+    var gradiA = 19;
     var max = 34;
     var min = 2;
 
@@ -382,6 +397,7 @@
     var temperatureTopic = "control-dashboard/0/value/temperature/setpoint";
     var brightnessTopic = "control-dashboard/0/value/brightness/setpoint";
     var humidityTopic = "control-dashboard/0/value/humidity/setpoint";
+    var airconditionTopic = "control-dashboard/0/value/aircondition/setpoint";
     var topicSelectIndex = 3;
 
     function onConnect() {
@@ -389,6 +405,7 @@
         mqtt.subscribe(temperatureTopic);
         mqtt.subscribe(brightnessTopic);
         mqtt.subscribe(humidityTopic);
+        mqtt.subscribe(airconditionTopic);
     }
 
     function onFailure() {
@@ -426,12 +443,13 @@
 
     function updateGr(newValue, topicChar) {
         console.log("Old newValue: " + newValue);
-        if (topicChar == "B" || topicChar == "H") newValue = Math.round(newValue * 34);
+        if (topicChar == "B" || topicChar == "H" || topicChar == "A") newValue = Math.round(newValue * 34);
         console.log("New newValue: " + newValue);
         var gradi;
         if (topicChar == "T") gradi = gradiT;
         if (topicChar == "B") gradi = gradiB;
         if (topicChar == "H") gradi = gradiH;
+        if (topicChar == "A") gradi = gradiA;
         console.log(`Old value: ${gradi}, new value: ${newValue}`);
         if (newValue < gradi) {
             if (newValue >= 18) {
@@ -455,13 +473,14 @@
         if (topicChar == "T") gradiT = newValue;
         if (topicChar == "B") gradiB = newValue;
         if (topicChar == "H") gradiH = newValue;
+        if (topicChar == "A") gradiA = newValue;
         $(`.number${topicChar}`).css("transform", "translate(-50%, -50%) rotate(" + (-180 + gradi * 10) + "deg)");
         $(`.shadow${topicChar}`).css("transform", "translate(-50%, -50%) rotate(" + (-180 + gradi * 10) + "deg)");
         $(`.fill${topicChar}`).css("animation", "none");
         $(`.shadow${topicChar}`).css("animation", "none");
         console.log("Old gradi: " + gradi);
         if (topicChar == "B") gradi = Math.round(gradi / 34 * 100);
-        if (topicChar == "H") gradi = (gradi / 34).toFixed(2);
+        if (topicChar == "H" || topicChar == "A") gradi = (gradi / 34).toFixed(2);
         console.log("New gradi: " + gradi);
         $(`.heat${topicChar}`).text("" + gradi);
         $(`.ext${topicChar}`).text("" + gradi);
