@@ -20,6 +20,7 @@ mqtt_data = {"temperature_log":24,"temperature_def":20, # initial definiton
 topic_climate = "climate-service/+/value/sensors/state"
 topic_dashboard = "control-dashboard/+/value/+/setpoint"
 topic_decision = "decision-maker/0/value/actuators/setpoint"
+topic_door = "time-slot-validation/0/value/door/setpoint"
 # last_sending_time = time.time() - publish_frequency
 
 # # Client initialization
@@ -64,6 +65,7 @@ def on_connect(client, userdata, flags, rc):
     # reconnect then subscriptions will be renewed.
     client.subscribe(topic_climate)
     client.subscribe(topic_dashboard)
+    client.subscribe(topic_door)
 
 def on_message(client, userdata, msg):
     # Compute only if last sending time is older than readout frequency
@@ -92,6 +94,10 @@ def on_message(client, userdata, msg):
             mqtt_data["aircondition_def"] = json.loads(decoded_payload)["set"]
         else:
             print("ERROR: undefined value name - ", value_name)
+
+    elif service_name == "time-slot-validation":
+        if value_name == "door":
+            mqtt_data["occupancy_log"] = json.loads(decoded_payload)["open"]
 
     print(mqtt_data)
     os.environ["MQTT_DATA"] = json.dumps(mqtt_data)
