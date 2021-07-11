@@ -1,3 +1,4 @@
+from apscheduler.schedulers.background import BackgroundScheduler
 import os
 import time
 import requests
@@ -20,10 +21,14 @@ mqtt_data = {"temperature_log":24,"temperature_def":20, # initial definiton
 topic_climate = "climate-service/+/value/sensors/state"
 topic_dashboard = "control-dashboard/+/value/+/setpoint"
 topic_decision = "decision-maker/0/value/actuators/setpoint"
+topic_door = "time-slot-validation/0/value/door/setpoint"
 # last_sending_time = time.time() - publish_frequency
 
-# # Client initialization
+# Client initialization
 client = mqtt.Client()
+
+# Reset occupancy status at every time slot end
+scheduler = BackgroundScheduler()
 
 def execute_planner():
     print("Create a plan")
@@ -64,6 +69,7 @@ def on_connect(client, userdata, flags, rc):
     # reconnect then subscriptions will be renewed.
     client.subscribe(topic_climate)
     client.subscribe(topic_dashboard)
+    client.subscribe(topic_door)
 
 def on_message(client, userdata, msg):
     # Compute only if last sending time is older than readout frequency
@@ -93,6 +99,12 @@ def on_message(client, userdata, msg):
         else:
             print("ERROR: undefined value name - ", value_name)
 
+    elif service_name == "time-slot-validation":
+        if value_name == "door":
+            mqtt_data["occupancy_log"] = json.loads(decoded_payload)["open"]
+        else:
+            print("ERROR: undefined vaue name - ", value_name)
+
     print(mqtt_data)
     os.environ["MQTT_DATA"] = json.dumps(mqtt_data)
     execute_planner()
@@ -105,6 +117,21 @@ def on_message(client, userdata, msg):
     #     print(mqtt_data)
     #     os.environ["MQTT_DATA"] = json.dumps(mqtt_data)
     #     execute_planner()
+
+
+# Reset person occupancy function at the end of each time slot
+def reset_occupancy():
+    mqtt_data["occupancy_log"] = False
+    print(mqtt_data)
+    os.environ["MQTT_DATA"] = json.dumps(mqtt_data)
+    execute_planner()
+
+# Execute cronjob
+scheduler.add_job(reset_occupancy, 'cron', hour='0', minute='0')
+scheduler.add_job(reset_occupancy, 'cron', hour='6', minute='0')
+scheduler.add_job(reset_occupancy, 'cron', hour='12', minute='0')
+scheduler.add_job(reset_occupancy, 'cron', hour='18', minute='0')
+scheduler.start()
 
 # first plan
 execute_planner()
