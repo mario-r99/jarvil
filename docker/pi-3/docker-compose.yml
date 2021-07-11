@@ -18,3 +18,14 @@ services:
       - AIRFILTER_PORT=9
       - HUMIDIFIER_PORT=10
       - THERMOSTAT_PORT=11
+
+  door-service:
+    # root path due to github actions file copy
+    build: ./services/door-service
+    devices:
+      # TODO: check if it is so
+      - /dev/ttyACM1
+    environment:
+      - MQTT_HOST=mqtt-broker
+      - USB_PORT=/dev/ttyACM1
+      - DOOR_PORT=1

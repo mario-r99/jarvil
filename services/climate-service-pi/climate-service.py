@@ -57,8 +57,6 @@ def publishingloop():
         air_state = board.analog[aircondition_port].read()
         humidity_state, temperature_state = Adafruit_DHT.read_retry(DHTSensor, humidity_temperature_GPIO_Pin)
 
-        #Read actuator status
-
         if (brightness_state == None or 
             air_state == None or
             temperature_state == None or 
