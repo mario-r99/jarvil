@@ -44,7 +44,7 @@ def validate_token(scanned_token):
         print(booking + ': ' + booking_token)
         if booking_token == scanned_token:
             print('Token is valid, sending mqtt message...')
-            client.publish('time-slot-validation/0/value/door/setpoint', json.dumps({"open": "true"}))
+            client.publish('time-slot-validation/0/value/door/setpoint', json.dumps({"open": True}))
             return
     print('Token not valid')
 

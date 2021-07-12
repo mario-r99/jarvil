@@ -77,7 +77,8 @@ class ClimateProblem(ClimateDomain):
     def init(self):
 
         # Static state
-        at = [self.at_person(self.rooms["workingArea"], self.occupants["occupant"]),
+        at = [
+            # self.at_person(self.rooms["workingArea"], self.occupants["occupant"]),
         
     #   self.high(self.sensors["temperatureW"]),
         # self.on(self.actuators["thermostat"]),
@@ -115,6 +116,9 @@ class ClimateProblem(ClimateDomain):
         
         if initial_state != None:
             print("Reading out the predicates")
+            if (initial_state['occupancy_log']):
+                at.append(self.at_person(self.rooms["workingArea"], self.occupants["occupant"]))
+                
             if (initial_state['temperature_log']-initial_state['temperature_def'] >= epsilon_temperature):
                 at.append(self.high(self.sensors["temperature"]))
             if (initial_state['temperature_log']-initial_state['temperature_def'] <= -epsilon_temperature):
