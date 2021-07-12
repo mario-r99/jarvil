@@ -1,0 +1,32 @@
+# mqtt endpoint devices
+version: "2.1"
+services:
+
+  climate-service:
+    # root path due to github actions file copy
+    build: ./services/climate-service-pi
+    privileged: true
+    devices:
+      - /dev/ttyACM0
+    environment:
+      - MQTT_HOST=192.168.1.172
+      - USB_PORT=/dev/ttyACM0
+      - BRIGHTNESS_PORT=0
+      - AIRCONDITION_PORT=5
+      - HUMIDITY_TEMPERATURE_PORT=23
+      - LIGHT_PORT=8
+      - AIRFILTER_PORT=9
+      - HUMIDIFIER_PORT=10
+      - THERMOSTAT_PORT=11
+
+  door-service:
+    # root path due to github actions file copy
+    build: ./services/door-service
+    privileged: true
+    devices:
+      # TODO: check if it is so
+      - /dev/ttyUSB0
+    environment:
+      - MQTT_HOST=192.168.1.172
+      - USB_PORT=/dev/ttyUSB0
+      - DOOR_PORT=2
