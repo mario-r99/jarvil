@@ -28,4 +28,4 @@ services:
     environment:
       - MQTT_HOST=mqtt-broker
       - USB_PORT=/dev/ttyACM1
-      - DOOR_PORT=1
+      - DOOR_PORT=2

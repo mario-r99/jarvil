@@ -134,6 +134,7 @@ scheduler.add_job(reset_occupancy, 'cron', hour='18', minute='0')
 scheduler.start()
 
 # first plan
+os.environ["MQTT_DATA"] = json.dumps(mqtt_data)
 execute_planner()
 
 client.on_connect = on_connect
