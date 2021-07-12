@@ -15,7 +15,8 @@ actuator_status = {"thermostat": False,
 mqtt_data = {"temperature_log":24,"temperature_def":20, # initial definiton
              "brightness_log":0.8,"brightness_def":0.8, # so that the state is fully defined
              "humidity_log":0.5,"humidity_def":0.5,
-             "aircondition_log":0.5,"aircondition_def":0.5
+             "aircondition_log":0.5,"aircondition_def":0.5,
+             "occupancy_log":True
              }
 
 topic_climate = "climate-service/+/value/sensors/state"
