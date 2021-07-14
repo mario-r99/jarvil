@@ -24,8 +24,8 @@ services:
     build: ./services/door-service
     devices:
       # TODO: check if it is so
-      - /dev/ttyACM1
+      - /dev/ttyUSB0
     environment:
       - MQTT_HOST=mqtt-broker
-      - USB_PORT=/dev/ttyACM1
+      - USB_PORT=/dev/ttyUSB0
       - DOOR_PORT=2
