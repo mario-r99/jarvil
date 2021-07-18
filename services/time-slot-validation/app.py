@@ -5,11 +5,13 @@ import redis
 import cv2
 import pytz
 import json
+import time
 import os
 
 # Global definitions
 broker_host = os.environ['MQTT_HOST']
 timezone = 'Europe/Berlin'
+sleep_time = 3
 
 # Initialize redis database
 cache = redis.Redis(host='redis', port=6379, charset="utf-8", decode_responses=True)
@@ -44,9 +46,13 @@ def validate_token(scanned_token):
         print(booking + ': ' + booking_token)
         if booking_token == scanned_token:
             print('Token is valid, sending mqtt message...')
+            client.publish('time-slot-validation/0/value/door/state', json.dumps({"validToken": True}))
             client.publish('time-slot-validation/0/value/door/setpoint', json.dumps({"open": True}))
+            time.sleep(sleep_time)
+            client.publish('time-slot-validation/0/value/door/setpoint', json.dumps({"open": False}))
             return
     print('Token not valid')
+    client.publish('time-slot-validation/0/value/door/state', json.dumps({"validToken": False}))
 
 # Camera reading
 previous_data = None

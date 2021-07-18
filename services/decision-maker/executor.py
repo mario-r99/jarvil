@@ -8,6 +8,7 @@ import threading
 
 # Global definitions
 broker_host = os.environ['MQTT_HOST']
+timezone = 'Europe/Berlin'
 # publish_frequency = 10
 actuator_status = {"thermostat": False,
                    "humidifier": False,
@@ -32,7 +33,7 @@ topic_door = "time-slot-validation/0/value/door/setpoint"
 client = mqtt.Client()
 
 # Reset occupancy status at every time slot end
-scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler(timezone=timezone)
 
 planning_frequency=10
 
