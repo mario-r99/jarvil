@@ -107,7 +107,8 @@ def on_message(client, userdata, msg):
 
     elif service_name == "time-slot-validation":
         if value_name == "door":
-            mqtt_data["occupancy_log"] = json.loads(decoded_payload)["open"]
+            if json.loads(decoded_payload)["open"]:
+                mqtt_data["occupancy_log"] = True
         else:
             print("ERROR: undefined vaue name - ", value_name)
 
