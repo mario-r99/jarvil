@@ -26,7 +26,7 @@ def publishingloop():
 
     sensors_topic = "climate-service/0/value/sensors/state"
     actuator_state_topic = "climate-service/0/value/actuators/state"
-    readout_frequency = 10
+    readout_frequency = 2
 
 
     # Client initialization

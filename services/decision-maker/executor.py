@@ -9,7 +9,7 @@ import json
 # Global definitions
 broker_host = os.environ['MQTT_HOST']
 timezone = 'Europe/Berlin'
-publish_frequency = 10
+publish_frequency = 5
 actuator_status = {"thermostat": False,
                    "humidifier": False,
                    "airfilter": False,
