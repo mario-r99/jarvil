@@ -10,9 +10,12 @@ actuator_setpoint = {"open": False}
 # Sensor readout loop
 def publishingloop():
     # Global definitions
-    broker_host = os.environ['MQTT_HOST']
-    usb_port = os.environ['USB_PORT']
-    door_port = int(os.environ['DOOR_PORT'])
+    # broker_host = os.environ['MQTT_HOST']
+    # usb_port = os.environ['USB_PORT']
+    # door_port = int(os.environ['DOOR_PORT'])
+    broker_host = '192.168.1.172'
+    usb_port = 'COM8'
+    door_port = 2
 
     door_state_topic = "door-service/0/value/door/state"
     readout_frequency = 1
@@ -55,7 +58,8 @@ def publishingloop():
 
 def subscribingloop():
     # Global definitions
-    broker_host = os.environ['MQTT_HOST']
+    # broker_host = os.environ['MQTT_HOST']
+    broker_host = '192.168.1.172'
     global actuator_setpoint
 
     door_setpoint_topic = "time-slot-validation/0/value/door/setpoint"

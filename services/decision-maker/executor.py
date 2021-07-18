@@ -7,6 +7,7 @@ import json
 
 # Global definitions
 broker_host = os.environ['MQTT_HOST']
+timezone = 'Europe/Berlin'
 # publish_frequency = 10
 actuator_status = {"thermostat": False,
                    "humidifier": False,
@@ -15,7 +16,8 @@ actuator_status = {"thermostat": False,
 mqtt_data = {"temperature_log":24,"temperature_def":20, # initial definiton
              "brightness_log":0.8,"brightness_def":0.8, # so that the state is fully defined
              "humidity_log":0.5,"humidity_def":0.5,
-             "aircondition_log":0.5,"aircondition_def":0.5
+             "aircondition_log":0.5,"aircondition_def":0.5,
+             "occupancy_log":True
              }
 
 topic_climate = "climate-service/+/value/sensors/state"
@@ -28,7 +30,7 @@ topic_door = "time-slot-validation/0/value/door/setpoint"
 client = mqtt.Client()
 
 # Reset occupancy status at every time slot end
-scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler(timezone=timezone)
 
 def execute_planner():
     print("Create a plan")
@@ -134,6 +136,7 @@ scheduler.add_job(reset_occupancy, 'cron', hour='18', minute='0')
 scheduler.start()
 
 # first plan
+os.environ["MQTT_DATA"] = json.dumps(mqtt_data)
 execute_planner()
 
 client.on_connect = on_connect
