@@ -26,7 +26,7 @@ def publishingloop():
 
     sensors_topic = "climate-service/0/value/sensors/state"
     actuator_state_topic = "climate-service/0/value/actuators/state"
-    readout_frequency = 2
+    readout_frequency = 10
 
 
     # Client initialization
@@ -57,13 +57,18 @@ def publishingloop():
         air_state = board.analog[aircondition_port].read()
         humidity_state, temperature_state = Adafruit_DHT.read_retry(DHTSensor, humidity_temperature_GPIO_Pin)
 
-        if (brightness_state == None or 
-            air_state == None or
-            temperature_state == None or 
-            humidity_state == None):
-            print("one of the sensors receives None data!")
-            time.sleep(readout_frequency)
-            continue
+        if (brightness_state == None):
+            brightness_state = 0
+            print("brightness_state recieves None data!")
+        if (air_state == None):
+            air_state = 0
+            print("air_state recieves None data!")
+        if (temperature_state == None):
+            temperature_state = 0
+            print("temperature_state recieves None data!")
+        if (humidity_state == None):
+            humidity_state = 0
+            print("humidity_state recieves None data!")
 
         # Set actuators
         board.digital[light_port].write(not actuator_setpoint["light"])
@@ -76,13 +81,19 @@ def publishingloop():
         airfilter_state = not board.digital[airfilter_port].read()
         humidifier_state = not board.digital[humidifier_port].read()
         thermostat_state = not board.digital[thermostat_port].read()
-        if (light_state == None or 
-            airfilter_state == None or
-            humidifier_state == None or
-            thermostat_state == None):
-            print("one of the actuators recieves None data!")
-            time.sleep(readout_frequency)
-            continue
+
+        if (light_state == None):
+            light_state = 0
+            print("light_state recieves None data!")
+        if (airfilter_state == None):
+            airfilter_state = 0
+            print("airfilter_state recieves None data!")
+        if (humidifier_state == None):
+            humidifier_state = 0
+            print("humidifier_state recieves None data!")
+        if (thermostat_state == None):
+            thermostat_state = 0
+            print("humidity_state recieves None data!")
 
         ## Logging data 
         sensor_status = {"brightness":brightness_state,

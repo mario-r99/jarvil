@@ -15,7 +15,7 @@ def publishingloop():
     door_port = int(os.environ['DOOR_PORT'])
 
     door_state_topic = "door-service/0/value/door/state"
-    readout_frequency = 1
+    readout_frequency = 10
 
     # Client initialization
     client = mqtt.Client()
