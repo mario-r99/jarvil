@@ -140,7 +140,7 @@ def subscribingloop():
     scheduler.add_job(reset_occupancy, 'cron', hour='6', minute='0')
     scheduler.add_job(reset_occupancy, 'cron', hour='12', minute='0')
     scheduler.add_job(reset_occupancy, 'cron', hour='18', minute='0')
-    scheduler.start()
+    # scheduler.start()
 
     client.on_connect = on_connect
     client.on_message = on_message
