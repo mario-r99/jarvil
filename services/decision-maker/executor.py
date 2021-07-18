@@ -18,7 +18,7 @@ mqtt_data = {"temperature_log":24,"temperature_def":20, # initial definiton
              "brightness_log":0.8,"brightness_def":0.8, # so that the state is fully defined
              "humidity_log":0.5,"humidity_def":0.5,
              "aircondition_log":0.5,"aircondition_def":0.5,
-             "occupancy_log":True
+             "occupancy_log":False
              }
 
 os.environ["MQTT_DATA"] = json.dumps(mqtt_data)
@@ -135,6 +135,9 @@ scheduler.add_job(reset_occupancy, 'cron', hour='0', minute='0')
 scheduler.add_job(reset_occupancy, 'cron', hour='6', minute='0')
 scheduler.add_job(reset_occupancy, 'cron', hour='12', minute='0')
 scheduler.add_job(reset_occupancy, 'cron', hour='18', minute='0')
+scheduler.add_job(reset_occupancy, 'cron', hour='21', minute='0')
+scheduler.add_job(reset_occupancy, 'cron', hour='21', minute='10')
+scheduler.add_job(reset_occupancy, 'cron', hour='21', minute='20')
 scheduler.start()
 
 client.on_connect = on_connect
