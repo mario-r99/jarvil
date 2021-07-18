@@ -124,7 +124,6 @@ def on_message(client, userdata, msg):
         os.environ["MQTT_DATA"] = json.dumps(mqtt_data)
         execute_planner()
 
-
 # Reset person occupancy function at the end of each time slot
 def reset_occupancy():
     mqtt_data["occupancy_log"] = False
